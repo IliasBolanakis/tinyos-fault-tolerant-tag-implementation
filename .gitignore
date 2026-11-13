@@ -1,0 +1,11 @@
+simbuild/
+_TOSSIMmodule.so
+TOSSIM.py
+TOSSIM.pyc
+app.xml
+*.class
+NotifyParentMsg.java
+test_worker.log
+fail_*.log
+*.pyc
+__pycache__/

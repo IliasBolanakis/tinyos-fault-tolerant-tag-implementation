@@ -1,0 +1,34 @@
+============================================================================
+  TinyOS/TOSSIM TAG Automated Verification Suite (19 Scenarios)
+============================================================================
+
+--- Group 1: Query Sweep ---
+[PASS] ( 1/19) T01_Query_SUM_3x3_R1.5                       (4.76s) WORKER_OK query=SUM epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] ( 2/19) T02_Query_AVG_3x3_R1.5                       (4.85s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] ( 3/19) T03_Query_VARIANCE_3x3_R1.5                  (4.67s) WORKER_OK query=VARIANCE epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] ( 4/19) T04_Query_MAX_3x3_R1.5                       (4.46s) WORKER_OK query=MAX epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+
+--- Group 2: Topologies & Scale ---
+[PASS] ( 5/19) T05_Grid_3x3_Orthogonal_R1.0                 (4.78s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] ( 6/19) T06_Grid_4x4_Diagonal_R1.5                   (8.66s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] ( 7/19) T07_Grid_4x4_Orthogonal_R1.0                 (7.86s) WORKER_OK query=SUM epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] ( 8/19) T08_Grid_5x5_Diagonal_R1.5                   (12.23s) WORKER_OK query=VARIANCE epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] ( 9/19) T09_Star_HighFanout_13Nodes                  (6.16s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] (10/19) T10_Linear_Chain_6Nodes                      (2.90s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+
+--- Group 3: Intermediate Failures ---
+[PASS] (11/19) T11_Leaf_Node_Death_3x3                      (5.18s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] (12/19) T12_Hub_Death_Backup_And_Orphan_3x3          (5.36s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=2 elections=0
+[PASS] (13/19) T13_Orthogonal_Hub_Death_No_Shallower_Backups (5.43s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=2 orphans=1 elections=0
+[PASS] (14/19) T14_Cascading_Hub_Deaths_Phase2_Orphan       (4.86s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=2 orphans=3 elections=0
+[PASS] (15/19) T15_Large_Grid_4x4_Dual_Hub_Failure          (8.81s) WORKER_OK query=SUM epoch_dur=100s epochs=8 failovers=2 orphans=1 elections=0
+
+--- Group 4: Root Elections & Partitions ---
+[PASS] (16/19) T16_Root0_Failure_Election_3x3               (5.93s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=1
+[PASS] (17/19) T17_Consecutive_Root_Failures_0_Then_1       (5.39s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=2
+[PASS] (18/19) T18_Combined_Chaos_Hub_Plus_Root_Death       (5.02s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=1 elections=1
+[PASS] (19/19) T19_Bridge_CutVertex_Network_Partition       (3.69s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=2 elections=0
+
+============================================================================
+  SUMMARY: 19/19 PASSED, 0 FAILED (Total time: 111.00s)
+============================================================================
