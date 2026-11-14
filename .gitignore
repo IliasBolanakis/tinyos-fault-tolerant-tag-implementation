@@ -1,3 +1,7 @@
+# Technical report / presentation LaTeX files (excluded from Git)
+presentation/
+
+# TinyOS / TOSSIM build and temporary simulation artifacts
 simbuild/
 _TOSSIMmodule.so
 TOSSIM.py

@@ -39,19 +39,32 @@ Defined in [SimpleRoutingTree.h](SimpleRoutingTree.h):
 
 ---
 
+## Modular TEP-3 Architecture
+
+The nesC application separates control-plane tree management, data-plane TAG aggregation, backup candidate tracking, and duplicate filtering into cohesive TinyOS TEP-3 components:
+
+- **Control Plane ([TreeTopology.nc](TreeTopology.nc) / [TreeRoutingP.nc](TreeRoutingP.nc)):** Owns `AM_ROUTINGMSG` (`22`) tree dissemination, `DEPTH_ROOT_PROBE` (`30`) liveness probing, slotted Root election with split-brain tie-breaking, and two-phase cycle-free orphan recovery (`DEPTH_UNATTACHED = 31`) across three dedicated `TimerMilliC` instances (`DisseminationTimerC`, `OrphanTimerC`, `ElectionTimerC`).
+- **Data Plane ([SRTreeC.nc](SRTreeC.nc)):** Coordinates `AM_MYMSG` (`23`) epoch execution (`MyTimerC`), `±25%` random-walk sensor sampling, duplicate-filtered subtree folding, and synchronous MAC ACK retries/failover snapshots through `TreeTopology`.
+- **Supporting Modules:** [BackupTableP.nc](BackupTableP.nc) (`@safe()`) maintains strictly shallower backup parents (`nDepth < curDepth`) with lowest-ID tie-breaking; [DupFilterP.nc](DupFilterP.nc) (`@safe()`) suppresses link-layer MAC retries within `DUP_RETRY_WINDOW_MILLIS` while allowing post-fire delta updates via the MSB `txPktToggle`.
+
+---
+
 ## Repository Structure
 
 | File | Description |
 | :--- | :--- |
-| [SRTreeAppC.nc](SRTreeAppC.nc) | Top-level nesC configuration wiring `SRTreeC`, `ActiveMessageC`, dual `AMSenderC`/`AMReceiverC` stacks (`AM 22` / `AM 23`), `PacketAcknowledgements`, timers, `RandomC`, and 4 `PacketQueueC(20)` queues. |
-| [SRTreeC.nc](SRTreeC.nc) | Core protocol implementation: tree dissemination, query scheduling, duplicate-filtered in-network aggregation, MAC ACK retries, backup failover, two-phase orphan recovery, and slotted Root election. |
-| [SimpleRoutingTree.h](SimpleRoutingTree.h) | AM IDs, timing/fault-tolerance constants, bit-packing macros, and minimal `nx_struct` packet definitions. |
+| [SRTreeAppC.nc](SRTreeAppC.nc) | Top-level nesC configuration wiring `SRTreeC`, `TreeRoutingP`, `BackupTableP`, `DupFilterP`, `ActiveMessageC`, dual `AMSenderC`/`AMReceiverC` stacks (`AM 22` / `AM 23`), `PacketAcknowledgements`, `RandomC`, 4 `PacketQueueC(20)` queues, and 4 demultiplexed `TimerMilliC` instances (`DisseminationTimerC`, `OrphanTimerC`, `ElectionTimerC`, `MyTimerC`). |
+| [SRTreeC.nc](SRTreeC.nc) | TAG data-plane aggregation module (`AM_MYMSG = 23`), handling bottom-up `MyTimer` epoch slotting, bounded `±25%` random-walk sensor sampling, duplicate-filtered child folding, and MAC ACK retry/failover snapshots coordinated via `TreeTopology`. |
+| [TreeTopology.nc](TreeTopology.nc) / [TreeRoutingP.nc](TreeRoutingP.nc) | Control-plane routing interface and private module (`AM_ROUTINGMSG = 22`), handling tree dissemination, two-phase cycle-free orphan recovery (`DEPTH_UNATTACHED = 31`), `DEPTH_ROOT_PROBE` (`30`) liveness probing, slotted Root election, and split-brain tie-breaking across dedicated `DisseminationTimer`, `OrphanTimer`, and `ElectionTimer` instances. |
+| [BackupTable.nc](BackupTable.nc) / [BackupTableP.nc](BackupTableP.nc) | Passive backup parent table interface and `@safe()` module (`MAX_BACKUP_PARENTS = 4`), enforcing strictly shallower failover candidate selection (`nDepth < curDepth`) with lowest-ID tie-breaking. |
+| [DupFilter.nc](DupFilter.nc) / [DupFilterP.nc](DupFilterP.nc) | Per-epoch duplicate MAC retry filter interface and `@safe()` module (`MAX_TRACKED_CHILDREN = 16`, `DUP_RETRY_WINDOW_MILLIS = 500`), distinguishing link-layer retransmissions from post-fire child deltas via the MSB `txPktToggle`. |
+| [SimpleRoutingTree.h](SimpleRoutingTree.h) | Protocol constants, standardized bit-packing/unpacking and time-conversion macros (`INVALID_NODE_ID`, `PACK_SEQ_DEPTH` / `UNPACK_SEQ` / `UNPACK_DEPTH`, `PACK_QUERY_EPOCH` / `UNPACK_QUERY` / `UNPACK_EPOCH_DUR`, `PACK_SUM_TOGGLE` / `UNPACK_SUM`, `PACK_MAX_TOGGLE` / `UNPACK_MAX`, `SEC_TO_BMILLI`, `HALF_SEC_TO_BMILLI`), and minimal `nx_struct` packet definitions. |
 | [PacketQueue.nc](PacketQueue.nc) / [PacketQueueC.nc](PacketQueueC.nc) | Generic FIFO `message_t` queue interface and ring-buffer component (`SENDER_QUEUE_SIZE = 20`, `RECEIVER_QUEUE_SIZE = 20`). |
 | [Makefile](Makefile) | TinyOS build configuration targeting `SRTreeAppC` (`-DSERIAL_EN`). |
 | [create_topology.py](create_topology.py) | Generates a `D x D` grid `topology.txt` for TOSSIM given diameter `D` and radio range `R` (`-50.0 dBm` symmetric links). |
 | [mySimulation.py](mySimulation.py) | Standalone 800-second TOSSIM runner with `meyer-heavy.txt` noise and two fault injections (intermediate Node `4` at `t=250s`, Root `0` at `t=450s`). |
 | [test_suite.py](test_suite.py) | Automated 19-scenario Python 2.7 verification suite running isolated TOSSIM subprocesses and asserting 7 routing and mathematical invariants. |
-| [run_sim.sh](run_sim.sh) / [run_tests.sh](run_tests.sh) | Helper shell scripts for copying files into `/home/tinyos/local/src/tinyos-2x/apps/tinyOS`, compiling `micaz sim`, and running simulation/tests inside the Ubuntu TinyOS VM. |
+| [run_sim.sh](run_sim.sh) / [run_tests.sh](run_tests.sh) | Helper shell scripts for copying all `.nc`, `.h`, `.py`, and test files into `/home/tinyos/local/src/tinyos-2x/apps/tinyOS`, compiling `micaz sim`, and running simulation/tests inside the Ubuntu TinyOS VM. |
 | [test_results.txt](test_results.txt) | Latest recorded output from running `test_suite.py` (`19/19 PASSED`). |
 
 ---

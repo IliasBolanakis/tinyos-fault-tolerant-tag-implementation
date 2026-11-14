@@ -4,8 +4,14 @@ cd /home/tinyos/local/src/tinyos-2x/apps/tinyOS
 cp ~/Desktop/tinyos_SHARED/project1/PacketQueue.nc .
 cp ~/Desktop/tinyos_SHARED/project1/PacketQueueC.nc .
 
-# 2. Copy only the 5 modified project files into the VM workspace
+# 2. Copy the refactored project files into the VM workspace
 cp ~/Desktop/tinyos_SHARED/project1/SimpleRoutingTree.h .
+cp ~/Desktop/tinyos_SHARED/project1/BackupTable.nc .
+cp ~/Desktop/tinyos_SHARED/project1/BackupTableP.nc .
+cp ~/Desktop/tinyos_SHARED/project1/DupFilter.nc .
+cp ~/Desktop/tinyos_SHARED/project1/DupFilterP.nc .
+cp ~/Desktop/tinyos_SHARED/project1/TreeTopology.nc .
+cp ~/Desktop/tinyos_SHARED/project1/TreeRoutingP.nc .
 cp ~/Desktop/tinyos_SHARED/project1/SRTreeAppC.nc .
 cp ~/Desktop/tinyos_SHARED/project1/SRTreeC.nc .
 cp ~/Desktop/tinyos_SHARED/project1/create_topology.py .

@@ -1,14 +1,16 @@
 /**
  * @file SRTreeAppC.nc
- * @brief Top-level configuration wiring the fault-tolerant TAG sensor network application.
+ * @brief Top-level TEP-3 configuration wiring the modular, fault-tolerant
+ *        TAG sensor network application (`SRTreeC`, `TreeRoutingP`,
+ *        `BackupTableP`, and `DupFilterP`).
  */
 #include "SimpleRoutingTree.h"
 
 configuration SRTreeAppC @safe() {
 }
 implementation {
-    // Core application logic module
-    components SRTreeC;
+    // Modular TEP-3 application components
+    components SRTreeC, TreeRoutingP, BackupTableP, DupFilterP;
 
 #if defined(DELUGE)
     components DelugeC;
@@ -37,37 +39,43 @@ implementation {
     components new PacketQueueC(SENDER_QUEUE_SIZE) as MySendQueueC;
     components new PacketQueueC(RECEIVER_QUEUE_SIZE) as MyReceiveQueueC;
 
-    // Timers: routing propagation / election delay and TAG epoch slotting
-    components new TimerMilliC() as RoutingMsgTimerC;
+    // Demultiplexed millisecond timers: dissemination, orphan pull, Root election, and TAG epoch slotting
+    components new TimerMilliC() as DisseminationTimerC;
+    components new TimerMilliC() as OrphanTimerC;
+    components new TimerMilliC() as ElectionTimerC;
     components new TimerMilliC() as MyTimerC;
 
-    // Wire platform and PRNG interfaces
+    // Wire platform and PRNG interfaces to data-plane coordinator
     SRTreeC.Boot -> MainC.Boot;
     SRTreeC.RadioControl -> ActiveMessageC;
     SRTreeC.Leds -> LedsC;
     SRTreeC.Random -> RandomC;
     SRTreeC.SeedInit -> RandomC.SeedInit;
 
-    // Wire timers
-    SRTreeC.RoutingMsgTimer -> RoutingMsgTimerC;
+    // Wire TAG epoch timer and data-plane AM 23 stack + synchronous MAC ACKs
     SRTreeC.MyTimer -> MyTimerC;
-
-    // Wire routing message stack (AM 22)
-    SRTreeC.RoutingPacket -> RoutingSenderC.Packet;
-    SRTreeC.RoutingAMPacket -> RoutingSenderC.AMPacket;
-    SRTreeC.RoutingAMSend -> RoutingSenderC.AMSend;
-    SRTreeC.RoutingReceive -> RoutingReceiverC.Receive;
-
-    // Wire data aggregation message stack (AM 23) and synchronous MAC ACKs
     SRTreeC.MyPacket -> MySenderC.Packet;
     SRTreeC.MyAMPacket -> MySenderC.AMPacket;
     SRTreeC.MyAMSend -> MySenderC.AMSend;
     SRTreeC.MyReceive -> MyReceiverC.Receive;
     SRTreeC.MyPacketAcknowledgements -> ActiveMessageC;
-
-    // Wire packet queue interfaces
-    SRTreeC.RoutingSendQueue -> RoutingSendQueueC;
-    SRTreeC.RoutingReceiveQueue -> RoutingReceiveQueueC;
     SRTreeC.MySendQueue -> MySendQueueC;
     SRTreeC.MyReceiveQueue -> MyReceiveQueueC;
+
+    // Wire extracted control-plane and helper modules
+    SRTreeC.TreeTopology -> TreeRoutingP.TreeTopology;
+    SRTreeC.BackupTable -> BackupTableP.BackupTable;
+    SRTreeC.DupFilter -> DupFilterP.DupFilter;
+
+    // Wire control-plane routing module (AM 22, demultiplexed timers, and BackupTable)
+    TreeRoutingP.RoutingPacket -> RoutingSenderC.Packet;
+    TreeRoutingP.RoutingAMPacket -> RoutingSenderC.AMPacket;
+    TreeRoutingP.RoutingAMSend -> RoutingSenderC.AMSend;
+    TreeRoutingP.RoutingReceive -> RoutingReceiverC.Receive;
+    TreeRoutingP.RoutingSendQueue -> RoutingSendQueueC;
+    TreeRoutingP.RoutingReceiveQueue -> RoutingReceiveQueueC;
+    TreeRoutingP.DisseminationTimer -> DisseminationTimerC;
+    TreeRoutingP.OrphanTimer -> OrphanTimerC;
+    TreeRoutingP.ElectionTimer -> ElectionTimerC;
+    TreeRoutingP.BackupTable -> BackupTableP.BackupTable;
 }
