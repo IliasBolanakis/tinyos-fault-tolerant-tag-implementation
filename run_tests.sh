@@ -4,26 +4,29 @@
 # builds _TOSSIMmodule.so if missing, executes all isolated test scenarios,
 # and copies the resulting report + restored topology.txt back to the shared folder.
 
-cd /home/tinyos/local/src/tinyos-2x/apps/tinyOS
-cp ~/Desktop/tinyos_SHARED/project1/PacketQueue.nc .
-cp ~/Desktop/tinyos_SHARED/project1/PacketQueueC.nc .
-cp ~/Desktop/tinyos_SHARED/project1/SimpleRoutingTree.h .
-cp ~/Desktop/tinyos_SHARED/project1/BackupTable.nc .
-cp ~/Desktop/tinyos_SHARED/project1/BackupTableP.nc .
-cp ~/Desktop/tinyos_SHARED/project1/DupFilter.nc .
-cp ~/Desktop/tinyos_SHARED/project1/DupFilterP.nc .
-cp ~/Desktop/tinyos_SHARED/project1/TreeTopology.nc .
-cp ~/Desktop/tinyos_SHARED/project1/TreeRoutingP.nc .
-cp ~/Desktop/tinyos_SHARED/project1/SRTreeAppC.nc .
-cp ~/Desktop/tinyos_SHARED/project1/SRTreeC.nc .
-cp ~/Desktop/tinyos_SHARED/project1/create_topology.py .
-cp ~/Desktop/tinyos_SHARED/project1/mySimulation.py .
-cp ~/Desktop/tinyos_SHARED/project1/test_suite.py .
+# Path to the shared project folder on your machine (update to match your setup)
+SHARED_DIR="$HOME/Desktop/tinyos_SHARED/project1"
 
-rm -f fail_*.log ~/Desktop/tinyos_SHARED/project1/fail_*.log
+cd /home/tinyos/local/src/tinyos-2x/apps/tinyOS
+cp "$SHARED_DIR/PacketQueue.nc" .
+cp "$SHARED_DIR/PacketQueueC.nc" .
+cp "$SHARED_DIR/SimpleRoutingTree.h" .
+cp "$SHARED_DIR/BackupTable.nc" .
+cp "$SHARED_DIR/BackupTableP.nc" .
+cp "$SHARED_DIR/DupFilter.nc" .
+cp "$SHARED_DIR/DupFilterP.nc" .
+cp "$SHARED_DIR/TreeTopology.nc" .
+cp "$SHARED_DIR/TreeRoutingP.nc" .
+cp "$SHARED_DIR/SRTreeAppC.nc" .
+cp "$SHARED_DIR/SRTreeC.nc" .
+cp "$SHARED_DIR/create_topology.py" .
+cp "$SHARED_DIR/mySimulation.py" .
+cp "$SHARED_DIR/test_suite.py" .
+
+rm -f fail_*.log "$SHARED_DIR"/fail_*.log
 make micaz sim || exit 1
 
 python ./test_suite.py | tee test_results.txt
-cp test_results.txt topology.txt ~/Desktop/tinyos_SHARED/project1/
-cp -f fail_*.log ~/Desktop/tinyos_SHARED/project1/ 2>/dev/null || true
+cp test_results.txt topology.txt "$SHARED_DIR/"
+cp -f fail_*.log "$SHARED_DIR/" 2>/dev/null || true
 

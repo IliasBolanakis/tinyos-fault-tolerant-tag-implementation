@@ -1,21 +1,25 @@
+#!/bin/bash
+# Path to the shared project folder on your machine (update to match your setup)
+SHARED_DIR="$HOME/Desktop/tinyos_SHARED/project1"
+
 cd /home/tinyos/local/src/tinyos-2x/apps/tinyOS
 
 # 1. Copy the restored queue files into the VM workspace
-cp ~/Desktop/tinyos_SHARED/project1/PacketQueue.nc .
-cp ~/Desktop/tinyos_SHARED/project1/PacketQueueC.nc .
+cp "$SHARED_DIR/PacketQueue.nc" .
+cp "$SHARED_DIR/PacketQueueC.nc" .
 
 # 2. Copy the refactored project files into the VM workspace
-cp ~/Desktop/tinyos_SHARED/project1/SimpleRoutingTree.h .
-cp ~/Desktop/tinyos_SHARED/project1/BackupTable.nc .
-cp ~/Desktop/tinyos_SHARED/project1/BackupTableP.nc .
-cp ~/Desktop/tinyos_SHARED/project1/DupFilter.nc .
-cp ~/Desktop/tinyos_SHARED/project1/DupFilterP.nc .
-cp ~/Desktop/tinyos_SHARED/project1/TreeTopology.nc .
-cp ~/Desktop/tinyos_SHARED/project1/TreeRoutingP.nc .
-cp ~/Desktop/tinyos_SHARED/project1/SRTreeAppC.nc .
-cp ~/Desktop/tinyos_SHARED/project1/SRTreeC.nc .
-cp ~/Desktop/tinyos_SHARED/project1/create_topology.py .
-cp ~/Desktop/tinyos_SHARED/project1/mySimulation.py .
+cp "$SHARED_DIR/SimpleRoutingTree.h" .
+cp "$SHARED_DIR/BackupTable.nc" .
+cp "$SHARED_DIR/BackupTableP.nc" .
+cp "$SHARED_DIR/DupFilter.nc" .
+cp "$SHARED_DIR/DupFilterP.nc" .
+cp "$SHARED_DIR/TreeTopology.nc" .
+cp "$SHARED_DIR/TreeRoutingP.nc" .
+cp "$SHARED_DIR/SRTreeAppC.nc" .
+cp "$SHARED_DIR/SRTreeC.nc" .
+cp "$SHARED_DIR/create_topology.py" .
+cp "$SHARED_DIR/mySimulation.py" .
 
 # 3. Clean and compile the TOSSIM simulation binary
 make clean
@@ -26,4 +30,4 @@ python ./create_topology.py 3 1.5
 python ./mySimulation.py 1 | tee output.txt
 
 # 5. Copy the newly generated topology.txt and output.txt back to the shared folder
-cp topology.txt output.txt ~/Desktop/tinyos_SHARED/project1/
+cp topology.txt output.txt "$SHARED_DIR/"
