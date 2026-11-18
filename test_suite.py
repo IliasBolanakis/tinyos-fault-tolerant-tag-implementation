@@ -13,7 +13,7 @@ This script operates in two modes:
      Generates the scenario's topology (`topology.txt`), boots a TOSSIM instance
      with `meyer-heavy.txt` empirical noise, runs to 800 simulated seconds with
      scheduled fault injections, writes debug output to `test_worker.log`, and
-     executes 7 automated protocol and mathematical invariant checks.
+     executes 8 automated protocol, radio-lifecycle, and mathematical invariant checks.
 
 Strictly Python 2.7 compatible using built-in standard libraries only.
 """
@@ -207,15 +207,16 @@ def connected_component(adj, root_id, dead_nodes):
 
 
 # ---------------------------------------------------------------------------
-# Exhaustive Scenario Definitions (19 Scenarios Across 4 Groups)
+# Exhaustive Scenario Definitions (20 Scenarios Across 5 Groups)
 # ---------------------------------------------------------------------------
 
 def build_scenarios():
-    """Return the ordered list of 19 automated test scenario dictionaries."""
+    """Return the ordered list of 20 automated test scenario dictionaries."""
     seed_sum = find_seed_for_query("SUM", (100, 90, 80, 70, 60))
     seed_avg = find_seed_for_query("AVG", (100, 90, 80, 70, 60))
     seed_var = find_seed_for_query("VARIANCE", (100, 90, 80, 70, 60))
     seed_max = find_seed_for_query("MAX", (100, 90, 80, 70, 60))
+    seed_avg_30 = find_seed_for_query("AVG", (30,))
 
     return [
         # --- Group 1: Query Type & Epoch Duration Sweep ---
@@ -434,6 +435,21 @@ def build_scenarios():
             "expect_root_election": False,
             "partition_test": True,
         },
+
+        # --- Group 5: Radio Duty-Cycling Lifecycle ---
+        {
+            "id": "T20_DutyCycle_Lifecycle_30s_Epochs",
+            "group": "Group 5: Radio Duty-Cycling",
+            "topo": ("grid", 3, 1.5),
+            "seed": seed_avg_30,
+            "expected_query": "AVG",
+            "faults": [],
+            "expect_hub_failover": False,
+            "expect_root_election": False,
+            "partition_test": False,
+            "expected_epoch_dur": 30,
+            "min_radio_cycles": 20,
+        },
     ]
 
 
@@ -451,6 +467,11 @@ RE_ROOT_BOOT = re.compile(
     r"DEBUG \(0\): ROOT \(Node 0\) booted: selected Query=(\d+) "
     r"\((SUM|AVG|VARIANCE|MAX)\), EpochDuration=(\d+) sec"
 )
+
+RE_RADIO_INIT = re.compile(r"DEBUG \((\d+)\): Radio initialized successfully!")
+RE_RADIO_STOP = re.compile(r"DEBUG \((\d+)\): Radio stopped!")
+RE_RADIO_EOFF = re.compile(r"EOFF")
+RE_RADIO_ESIZE = re.compile(r"returned ESIZE")
 
 RE_SELECT_PARENT = re.compile(
     r"DEBUG \((\d+)\): Node \1 selected parentID=(\d+), depth=(\d+) "
@@ -516,7 +537,7 @@ def parse_timestamp_seconds(line):
 
 
 # ---------------------------------------------------------------------------
-# Simulation Runner & 7-Invariant Verification Engine (Worker Mode)
+# Simulation Runner & 8-Invariant Verification Engine (Worker Mode)
 # ---------------------------------------------------------------------------
 
 def build_scenario_topology(topo_spec, filepath=TEST_TOPO_FILE):
@@ -666,8 +687,8 @@ def check_cycle_freedom(active_parent, active_depth, active_seq, active_root, de
 
 def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
     """
-    Parse `log_path` and verify all 7 protocol, routing, and ground-truth
-    aggregation invariants. Raises AssertionError on any violation.
+    Parse `log_path` and verify all 8 protocol, routing, radio-lifecycle, and
+    ground-truth aggregation invariants. Raises AssertionError on any violation.
     """
     num_nodes = len(adj)
     f = open(log_path, "r")
@@ -686,6 +707,11 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
     orphan_events = []       # (node, lost_p, t_sec)
     election_events = []     # (new_root, tree_seq, epoch_num, t_sec, eligible_d1_snapshot)
     fault_times = []         # (node_id, t_sec)
+    radio_state_tracker = {} # node_id -> "ON" or "OFF"
+    radio_starts = {}        # node_id -> start count
+    radio_stops = {}         # node_id -> stop count
+    eoff_lines = []          # any EOFF transmit warning lines
+    esize_lines = []         # any ESIZE transmit drop warning lines
 
     # Dynamic routing state tracker for cycle/depth & election verification
     active_parent = {0: 0}
@@ -705,6 +731,35 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
         ts = parse_timestamp_seconds(line)
         if ts is not None:
             last_time = ts
+
+        if RE_RADIO_EOFF.search(line):
+            eoff_lines.append(line)
+        if RE_RADIO_ESIZE.search(line):
+            esize_lines.append(line)
+
+        m_rinit = RE_RADIO_INIT.search(line)
+        if m_rinit:
+            rnid = int(m_rinit.group(1))
+            if radio_state_tracker.get(rnid) == "ON":
+                raise AssertionError(
+                    "[Invariant 8: Radio Lifecycle] Node %d consecutive start without stop at t=%.3fs"
+                    % (rnid, last_time)
+                )
+            radio_state_tracker[rnid] = "ON"
+            radio_starts[rnid] = radio_starts.get(rnid, 0) + 1
+            continue
+
+        m_rstop = RE_RADIO_STOP.search(line)
+        if m_rstop:
+            rnid = int(m_rstop.group(1))
+            if radio_state_tracker.get(rnid) != "ON":
+                raise AssertionError(
+                    "[Invariant 8: Radio Lifecycle] Node %d stop without active start at t=%.3fs"
+                    % (rnid, last_time)
+                )
+            radio_state_tracker[rnid] = "OFF"
+            radio_stops[rnid] = radio_stops.get(rnid, 0) + 1
+            continue
 
         m_fault = RE_FAULT.match(line)
         if m_fault:
@@ -876,6 +931,11 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
         raise AssertionError(
             "Query mismatch: expected %s (seed=%d), got %s"
             % (scenario["expected_query"], scenario["seed"], root_query_name)
+        )
+    if scenario.get("expected_epoch_dur") and epoch_dur != scenario["expected_epoch_dur"]:
+        raise AssertionError(
+            "Epoch duration mismatch: expected %ds (seed=%d), got %ds"
+            % (scenario["expected_epoch_dur"], scenario["seed"], epoch_dur)
         )
 
     # --- Invariant 1: Bounded Random Walk & Sample Range Check ---
@@ -1067,6 +1127,82 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
                     % (res["epoch"], res.get("count"))
                 )
 
+    # --- Invariant 8: Radio Duty-Cycling & SplitControl Lifecycle ---
+    if eoff_lines:
+        raise AssertionError(
+            "[Invariant 8: Radio Lifecycle] Observed EOFF radio transmit warnings: %s"
+            % (eoff_lines[:5],)
+        )
+    if esize_lines:
+        raise AssertionError(
+            "[Invariant 8: Radio Lifecycle] Observed ESIZE radio transmit drops: %s"
+            % (esize_lines[:5],)
+        )
+
+    final_root = epoch_results[-1]["root"] if epoch_results else 0
+    surviving_connected = connected_component(adj, final_root, dead_nodes)
+    is_steady_state = (not scenario.get("faults") and not scenario.get("partition_test"))
+    min_cycles_req = scenario.get("min_radio_cycles", 0)
+    expect_final_off = (
+        bool(epoch_results)
+        and epoch_results[-1]["time"] < (DEFAULT_SIM_SECONDS - 3.0)
+    )
+
+    for nid in range(num_nodes):
+        n_starts = radio_starts.get(nid, 0)
+        n_stops = radio_stops.get(nid, 0)
+        if n_starts < 1:
+            raise AssertionError(
+                "[Invariant 8: Radio Lifecycle] Node %d never started its radio" % nid
+            )
+        if not (0 <= (n_starts - n_stops) <= 1):
+            raise AssertionError(
+                "[Invariant 8: Radio Lifecycle] Node %d start/stop parity violation: starts=%d stops=%d"
+                % (nid, n_starts, n_stops)
+            )
+        if expect_final_off and nid in surviving_connected and (n_starts != n_stops or radio_state_tracker.get(nid) != "OFF"):
+            raise AssertionError(
+                "[Invariant 8: Radio Lifecycle] Surviving Node %d failed to return to RADIO_OFF after final epoch (starts=%d, stops=%d, state=%s)"
+                % (nid, n_starts, n_stops, radio_state_tracker.get(nid))
+            )
+
+        node_epochs = len(samples.get(nid, {}))
+        if nid in surviving_connected and node_epochs >= 2:
+            if n_starts < 2 or n_stops < 1:
+                raise AssertionError(
+                    "[Invariant 8: Radio Lifecycle] Surviving Node %d failed to power-cycle across %d epochs (starts=%d, stops=%d)"
+                    % (nid, node_epochs, n_starts, n_stops)
+                )
+            if is_steady_state and epoch_dur <= 100 and len(epoch_results) >= 3:
+                min_expected_stops = max(2, len(epoch_results) - 1)
+                if n_stops < min_expected_stops:
+                    raise AssertionError(
+                        "[Invariant 8: Radio Lifecycle] Steady-state Node %d expected >= %d radio stops across %d epochs, got %d"
+                        % (nid, min_expected_stops, len(epoch_results), n_stops)
+                    )
+            elif not is_steady_state and epoch_dur <= 100 and len(epoch_results) >= 4:
+                min_fault_stops = max(2, len(epoch_results) - len(scenario.get("faults", [])))
+                if n_stops < min_fault_stops:
+                    raise AssertionError(
+                        "[Invariant 8: Radio Lifecycle] Surviving Node %d expected >= %d radio stops across %d epochs (faults=%d), got %d"
+                        % (nid, min_fault_stops, len(epoch_results), len(scenario.get("faults", [])), n_stops)
+                    )
+            if min_cycles_req > 0 and (n_starts < min_cycles_req or n_stops < min_cycles_req):
+                raise AssertionError(
+                    "[Invariant 8: Radio Lifecycle] Node %d expected >= %d radio start/stop cycles, got starts=%d stops=%d"
+                    % (nid, min_cycles_req, n_starts, n_stops)
+                )
+        elif node_epochs >= 2:
+            # Faulted/partitioned nodes that completed >= 2 epochs before death/partition
+            # must have undergone radio duty-cycling prior to the fault/partition.
+            if n_starts < 2 or n_stops < 1:
+                raise AssertionError(
+                    "[Invariant 8: Radio Lifecycle] Node %d completed %d epochs without duty-cycling (starts=%d, stops=%d)"
+                    % (nid, node_epochs, n_starts, n_stops)
+                )
+
+    surv_stops = [radio_stops.get(nid, 0) for nid in surviving_connected] if surviving_connected else [0]
+
     return {
         "query": root_query_name,
         "epoch_dur": epoch_dur,
@@ -1074,11 +1210,13 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
         "failovers": len(failover_events),
         "orphans": len(orphan_events),
         "elections": len(election_events),
+        "min_stops": min(surv_stops),
+        "max_stops": max(surv_stops),
     }
 
 
 def run_worker(scenario_id):
-    """Worker entrypoint: simulate one scenario in isolation and assert all 7 invariants."""
+    """Worker entrypoint: simulate one scenario in isolation and assert all 8 invariants."""
     if scenario_id not in SCENARIO_BY_ID:
         sys.stderr.write("Unknown scenario ID: %s\n" % scenario_id)
         sys.exit(2)
@@ -1087,7 +1225,7 @@ def run_worker(scenario_id):
     adj = run_tossim_scenario(scenario)
     stats = verify_log_invariants(scenario, adj, WORKER_LOG_FILE)
     print(
-        "WORKER_OK query=%s epoch_dur=%ds epochs=%d failovers=%d orphans=%d elections=%d"
+        "WORKER_OK query=%s epoch_dur=%ds epochs=%d failovers=%d orphans=%d elections=%d stops=%d..%d"
         % (
             stats["query"],
             stats["epoch_dur"],
@@ -1095,6 +1233,8 @@ def run_worker(scenario_id):
             stats["failovers"],
             stats["orphans"],
             stats["elections"],
+            stats["min_stops"],
+            stats["max_stops"],
         )
     )
 

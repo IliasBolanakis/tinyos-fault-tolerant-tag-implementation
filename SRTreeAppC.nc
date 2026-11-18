@@ -2,7 +2,8 @@
  * @file SRTreeAppC.nc
  * @brief Top-level TEP-3 configuration wiring the modular, fault-tolerant
  *        TAG sensor network application (`SRTreeC`, `TreeRoutingP`,
- *        `BackupTableP`, and `DupFilterP`).
+ *        `BackupTableP`, and `DupFilterP`) with TAG-slot-aligned radio
+ *        duty-cycling (`RadioWakeTimerC`, `SplitControl` owned by `SRTreeC`).
  */
 #include "SimpleRoutingTree.h"
 
@@ -39,21 +40,23 @@ implementation {
     components new PacketQueueC(SENDER_QUEUE_SIZE) as MySendQueueC;
     components new PacketQueueC(RECEIVER_QUEUE_SIZE) as MyReceiveQueueC;
 
-    // Demultiplexed millisecond timers: dissemination, orphan pull, Root election, and TAG epoch slotting
+    // Demultiplexed millisecond timers: dissemination, orphan pull, Root election, TAG epoch slotting, and radio duty-cycling
     components new TimerMilliC() as DisseminationTimerC;
     components new TimerMilliC() as OrphanTimerC;
     components new TimerMilliC() as ElectionTimerC;
     components new TimerMilliC() as MyTimerC;
+    components new TimerMilliC() as RadioWakeTimerC;
 
-    // Wire platform and PRNG interfaces to data-plane coordinator
+    // Wire platform and PRNG interfaces to data-plane coordinator (SRTreeC owns SplitControl exclusively)
     SRTreeC.Boot -> MainC.Boot;
     SRTreeC.RadioControl -> ActiveMessageC;
     SRTreeC.Leds -> LedsC;
     SRTreeC.Random -> RandomC;
     SRTreeC.SeedInit -> RandomC.SeedInit;
 
-    // Wire TAG epoch timer and data-plane AM 23 stack + synchronous MAC ACKs
+    // Wire TAG epoch timer, radio duty-cycle wake/listen timer, and data-plane AM 23 stack + synchronous MAC ACKs
     SRTreeC.MyTimer -> MyTimerC;
+    SRTreeC.RadioWakeTimer -> RadioWakeTimerC;
     SRTreeC.MyPacket -> MySenderC.Packet;
     SRTreeC.MyAMPacket -> MySenderC.AMPacket;
     SRTreeC.MyAMSend -> MySenderC.AMSend;

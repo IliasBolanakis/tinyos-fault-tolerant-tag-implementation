@@ -60,6 +60,14 @@ interface TreeTopology {
     command uint8_t getOrphanPhase();
 
     /**
+     * @brief Checks whether this non-root node is detached or still awaiting its
+     *        first post-orphan `RoutingMsg` broadcast while child shedding settles.
+     *
+     * @return TRUE if unattached or awaiting the post-orphan routing advertisement.
+     */
+    command bool isOrphanShedPending();
+
+    /**
      * @brief Checks whether the node is within `ROOT_RECOVERY_DELAY` ms of
      *        joining a newly elected Root's tree wave.
      *
@@ -70,6 +78,15 @@ interface TreeTopology {
 
     /** @return TRUE while `RoutingAMSend` holds the shared radio channel. */
     command bool isRoutingSendBusy();
+
+    /**
+     * @brief Checks whether the control plane has any pending transmissions,
+     *        active timers, election/settle state, or unattached/orphan recovery
+     *        work that requires the radio to remain powered on.
+     *
+     * @return TRUE if routing work is active or the node must keep listening.
+     */
+    command bool hasPendingRoutingWork();
 
     /**
      * @brief Attempts to schedule a pending routing transmission once data-plane
@@ -115,6 +132,27 @@ interface TreeTopology {
 
     /** @return TRUE while `MyAMSend` holds the shared radio channel. */
     event bool isDataSendBusy();
+
+    /** @return TRUE if the `SplitControl` radio stack is currently in `RADIO_ON`. */
+    event bool isRadioOn();
+
+    /**
+     * @brief Requests `SRTreeC` to wake the radio immediately when control-plane
+     *        operations (elections, orphan pulls, or queued broadcasts) need TX/RX.
+     */
+    event void requestRadioWake();
+
+    /**
+     * @brief Notifies `SRTreeC` that control-plane work completed so it can
+     *        re-evaluate whether the radio may safely transition to sleep.
+     */
+    event void checkRadioSleep();
+
+    /**
+     * @brief Notifies `SRTreeC` that a routing transmission returned `EOFF`
+     *        so `SRTreeC` can resynchronize `radioState` and restart the radio.
+     */
+    event void handleRadioEoff();
 
     /** @return Current `epochCounter` from the data plane. */
     event uint16_t getEpochCounter();

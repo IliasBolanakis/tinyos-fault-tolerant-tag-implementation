@@ -48,6 +48,13 @@ implementation {
     uint8_t orphanMaxNeighborDepth = DEPTH_UNATTACHED;
     uint32_t radioStartTime = 0;
     uint32_t treeJoinTime = 0;
+    /** @brief TRUE once `treeJoinTime` records a valid superior-Root wave adoption timestamp. */
+    bool hasTreeJoinTime = FALSE;
+
+    /** @brief TRUE when an attached node enters orphan recovery and sheds child aggregates, cleared once its post-orphan attached routing beacon completes `RoutingAMSend.sendDone(SUCCESS)`. */
+    bool myShedPending = FALSE;
+    /** @brief Bounded retry counter for failed post-orphan shed beacon transmissions. */
+    uint8_t shedBeaconRetryCount = 0;
 
     task void sendRoutingTask();
     task void receiveRoutingTask();
@@ -83,7 +90,7 @@ implementation {
         }
 
         mrpkt->depth = PACK_SEQ_DEPTH(treeSeq, advertisedDepth);
-        mrpkt->queryAndEpoch = PACK_QUERY_EPOCH(epochDuration, queryType);
+        mrpkt->queryAndEpoch = PACK_QUERY_EPOCH_SHED(epochDuration, queryType, myShedPending ? 1 : 0);
         mrpkt->rootID = (uint8_t)currentRootID;
 
         call RoutingAMPacket.setDestination(&tmp, AM_BROADCAST_ADDR);
@@ -115,11 +122,14 @@ implementation {
         treeSeq = 0;
         radioStartTime = 0;
         treeJoinTime = 0;
+        hasTreeJoinTime = FALSE;
         electionPending = FALSE;
         rootJustPromoted = FALSE;
         orphanPullPending = FALSE;
         orphanPhase = ORPHAN_NONE;
         orphanMaxNeighborDepth = DEPTH_UNATTACHED;
+        myShedPending = FALSE;
+        shedBeaconRetryCount = 0;
         call BackupTable.clear();
 
         if (rootNode) {
@@ -161,12 +171,37 @@ implementation {
     command bool TreeTopology.isRootJustPromoted() { return rootJustPromoted; }
     command uint8_t TreeTopology.getOrphanPhase() { return orphanPhase; }
 
+    command bool TreeTopology.isOrphanShedPending() {
+        return (!isRoot && (curdepth >= DEPTH_ROOT_PROBE || myShedPending));
+    }
+
     command bool TreeTopology.isInRecoveryWindow(uint32_t now) {
-        return (treeJoinTime > 0 && (now - treeJoinTime) < ROOT_RECOVERY_DELAY);
+        return (hasTreeJoinTime && (now - treeJoinTime) < ROOT_RECOVERY_DELAY);
     }
 
     command bool TreeTopology.isRoutingSendBusy() {
         return RoutingSendBusy;
+    }
+
+    command bool TreeTopology.hasPendingRoutingWork() {
+        if (RoutingSendBusy ||
+            !(call RoutingSendQueue.empty()) ||
+            !(call RoutingReceiveQueue.empty())) {
+            return TRUE;
+        }
+        if (electionPending || rootJustPromoted ||
+            orphanPhase != ORPHAN_NONE || orphanPullPending) {
+            return TRUE;
+        }
+        if (!isRoot && curdepth >= DEPTH_ROOT_PROBE) {
+            return TRUE;
+        }
+        if ((call DisseminationTimer.isRunning()) ||
+            (call OrphanTimer.isRunning()) ||
+            (call ElectionTimer.isRunning())) {
+            return TRUE;
+        }
+        return FALSE;
     }
 
     command void TreeTopology.kickRoutingSend() {
@@ -185,6 +220,9 @@ implementation {
         electionPending = TRUE;
         currentRootID = parentID;
         call OrphanTimer.stop();
+        if (!(signal TreeTopology.isRadioOn())) {
+            signal TreeTopology.requestRadioWake();
+        }
         enqueueRoutingBroadcast(DEPTH_ROOT_PROBE);
         dbg("SRTreeC", "Node %u (depth 1) detected ROOT %u FAILURE! Probing & starting election timer (%lu ms)\n",
             TOS_NODE_ID, currentRootID, (unsigned long)electDelay);
@@ -232,6 +270,8 @@ implementation {
     command void TreeTopology.enterOrphanState() {
         if (curdepth < DEPTH_ROOT_PROBE) {
             orphanMaxNeighborDepth = curdepth;
+            myShedPending = TRUE;
+            shedBeaconRetryCount = 0;
         }
         orphanPhase = ORPHAN_PULL_P1;
         parentID = INVALID_NODE_ID;
@@ -243,6 +283,9 @@ implementation {
         orphanPullPending = TRUE;
         call DisseminationTimer.stop();
         if (!electionPending && !rootJustPromoted) {
+            if (!(signal TreeTopology.isRadioOn())) {
+                signal TreeTopology.requestRadioWake();
+            }
             // Issue a single Phase-1 pull immediately and enter ORPHAN_WAIT_P1;
             // avoids a duplicate P1 broadcast that would reset neighbors' reply timers.
             orphanPhase = ORPHAN_WAIT_P1;
@@ -270,6 +313,7 @@ implementation {
         if (isRoot && rootJustPromoted) {
             rootJustPromoted = FALSE;
             signal TreeTopology.onRootSettleComplete();
+            signal TreeTopology.checkRadioSleep();
             return;
         }
 
@@ -281,21 +325,30 @@ implementation {
             isRoot = TRUE;
             currentRootID = TOS_NODE_ID;
             parentID = TOS_NODE_ID;
+            myShedPending = FALSE;
+            shedBeaconRetryCount = 0;
             curdepth = 0;
             orphanPullPending = FALSE;
             orphanPhase = ORPHAN_NONE;
             orphanMaxNeighborDepth = DEPTH_UNATTACHED;
             treeSeq = (treeSeq + 1) & 0x07;
             rootJustPromoted = TRUE;
+            treeJoinTime = 0;
+            hasTreeJoinTime = FALSE;
 
             call DisseminationTimer.stop();
             call OrphanTimer.stop();
             signal TreeTopology.onRootPromoted(treeSeq, now);
 
             // Schedule settle window so sibling Depth-1 nodes can forward their saved aggregates
+            // and emit one follow-up depth-0 beacon after initial failover bursts subside
             call ElectionTimer.startOneShot(ROOT_RECOVERY_DELAY);
+            call DisseminationTimer.startOneShot(ROOT_PROBE_REPLY_MILLIS);
             enqueueRoutingBroadcast(0);
+            return;
         }
+
+        signal TreeTopology.checkRadioSleep();
     }
 
     /**
@@ -305,15 +358,23 @@ implementation {
      */
     event void DisseminationTimer.fired() {
         if (rootJustPromoted) {
+            if (isRoot) {
+                enqueueRoutingBroadcast(0);
+                return;
+            }
+            signal TreeTopology.checkRadioSleep();
             return;
         }
         if (electionPending) {
             if (!isRoot) {
                 enqueueRoutingBroadcast(DEPTH_ROOT_PROBE);
+            } else {
+                signal TreeTopology.checkRadioSleep();
             }
             return;
         }
         if (!isRoot && curdepth == DEPTH_UNATTACHED) {
+            signal TreeTopology.checkRadioSleep();
             return;
         }
 
@@ -331,7 +392,12 @@ implementation {
      */
     event void OrphanTimer.fired() {
         if (isRoot || curdepth != DEPTH_UNATTACHED || electionPending || rootJustPromoted) {
+            signal TreeTopology.checkRadioSleep();
             return;
+        }
+
+        if (!(signal TreeTopology.isRadioOn())) {
+            signal TreeTopology.requestRadioWake();
         }
 
         // If an unattached node's boot watchdog fired, transition into active Phase-2 pull
@@ -368,11 +434,33 @@ implementation {
     }
 
     event void RoutingAMSend.sendDone(message_t* msg, error_t err) {
+        RoutingMsg* spkt;
+
         RoutingSendBusy = FALSE;
+        if (!isRoot && curdepth < DEPTH_ROOT_PROBE && myShedPending &&
+            (call RoutingSendQueue.empty())) {
+            spkt = (RoutingMsg*)(call RoutingPacket.getPayload(msg, sizeof(RoutingMsg)));
+            if (spkt != NULL && UNPACK_DEPTH(spkt->depth) < DEPTH_ROOT_PROBE) {
+                if (err == SUCCESS) {
+                    myShedPending = FALSE;
+                    shedBeaconRetryCount = 0;
+                } else if (!electionPending && !rootJustPromoted &&
+                           shedBeaconRetryCount < MAX_SHED_BEACON_RETRIES) {
+                    shedBeaconRetryCount++;
+                    call DisseminationTimer.startOneShot(HOP_DELAY_MILLIS + (uint32_t)(TOS_NODE_ID % 4) * 2);
+                } else {
+                    myShedPending = FALSE;
+                    shedBeaconRetryCount = 0;
+                }
+            }
+        }
         if (!(call RoutingSendQueue.empty())) {
             post sendRoutingTask();
         }
         signal TreeTopology.routingSendCompleted();
+        if (call RoutingSendQueue.empty() && !RoutingSendBusy) {
+            signal TreeTopology.checkRadioSleep();
+        }
     }
 
     event message_t* RoutingReceive.receive(message_t* msg, void* payload, uint8_t len) {
@@ -393,9 +481,14 @@ implementation {
         error_t sendDone;
 
         if (call RoutingSendQueue.empty()) {
+            signal TreeTopology.checkRadioSleep();
             return;
         }
         if (RoutingSendBusy || (signal TreeTopology.isDataSendBusy())) {
+            return;
+        }
+        if (!(signal TreeTopology.isRadioOn())) {
+            signal TreeTopology.requestRadioWake();
             return;
         }
 
@@ -406,6 +499,12 @@ implementation {
         mdest = call RoutingAMPacket.destination(&radioRoutingSendPkt);
         if (mlen != sizeof(RoutingMsg)) {
             call RoutingSendQueue.dequeue();
+            if (!(call RoutingSendQueue.empty())) {
+                post sendRoutingTask();
+            } else {
+                signal TreeTopology.routingSendCompleted();
+                signal TreeTopology.checkRadioSleep();
+            }
             return;
         }
 
@@ -413,8 +512,34 @@ implementation {
         if (sendDone == SUCCESS) {
             call RoutingSendQueue.dequeue();
             RoutingSendBusy = TRUE;
+        } else if (sendDone == EOFF) {
+            dbg("Radio", "WARN: Node %u RoutingAMSend.send returned EOFF\n", TOS_NODE_ID);
+            signal TreeTopology.handleRadioEoff();
+            return;
+        } else if (sendDone == ESIZE) {
+            dbg("SRTreeC", "WARN: Node %u RoutingAMSend.send returned ESIZE (len=%u); dropping\n",
+                TOS_NODE_ID, mlen);
+            call RoutingSendQueue.dequeue();
+            if (!(call RoutingSendQueue.empty())) {
+                post sendRoutingTask();
+            } else {
+                signal TreeTopology.routingSendCompleted();
+                signal TreeTopology.checkRadioSleep();
+            }
         } else {
             post sendRoutingTask();
+        }
+    }
+
+    /**
+     * @brief Continues draining `RoutingReceiveQueue` or signals `SRTreeC` to
+     *        re-evaluate radio sleep once all queued control frames are handled.
+     */
+    void scheduleNextOrCheckSleepRoutingRx() {
+        if (!(call RoutingReceiveQueue.empty())) {
+            post receiveRoutingTask();
+        } else {
+            signal TreeTopology.checkRadioSleep();
         }
     }
 
@@ -430,6 +555,7 @@ implementation {
         uint8_t len;
 
         if (call RoutingReceiveQueue.empty()) {
+            signal TreeTopology.checkRadioSleep();
             return;
         }
 
@@ -441,6 +567,7 @@ implementation {
             uint16_t senderID = call RoutingAMPacket.source(&radioRoutingRecPkt);
             uint8_t msgSeq = UNPACK_SEQ(mpkt->depth);
             uint8_t msgDepth = UNPACK_DEPTH(mpkt->depth);
+            uint8_t msgShed = UNPACK_SHED_TOGGLE(mpkt->queryAndEpoch);
             uint16_t msgRootID = mpkt->rootID;
             uint8_t offeredDepth = msgDepth + 1;
 
@@ -459,6 +586,7 @@ implementation {
                                       (msgDepth < DEPTH_ROOT_PROBE) &&
                                       (msgRootID > currentRootID);
             bool isSuperiorTree = isNewTreeSeq || isSameSeqBetterRoot;
+            bool parentShed = FALSE;
 
             // 0. Root liveness probe (code 30): only the active Root replies immediately
             //    (plus a follow-up beacon after ROOT_PROBE_REPLY_MILLIS once busy sibling bursts
@@ -468,7 +596,7 @@ implementation {
                     enqueueRoutingBroadcast(0);
                     call DisseminationTimer.startOneShot(ROOT_PROBE_REPLY_MILLIS);
                 }
-                if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                scheduleNextOrCheckSleepRoutingRx();
                 return;
             }
 
@@ -480,7 +608,7 @@ implementation {
                         dbg("SRTreeC", "Node %u parent %u became unattached; recovering\n",
                             TOS_NODE_ID, senderID);
                         handleParentInvalidated(call DisseminationTimer.getNow());
-                        if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                        scheduleNextOrCheckSleepRoutingRx();
                         return;
                     }
                     call BackupTable.updateCandidate(senderID, DEPTH_UNATTACHED, parentID, curdepth);
@@ -492,7 +620,7 @@ implementation {
                     (msgSeq == treeSeq || isOlderTreeSeq)) {
                     call DisseminationTimer.startOneShot((2 * HOP_DELAY_MILLIS) + (TOS_NODE_ID % 8) * 5);
                 }
-                if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                scheduleNextOrCheckSleepRoutingRx();
                 return;
             }
 
@@ -505,7 +633,7 @@ implementation {
                 dbg("SRTreeC", "Node %u aborted Root Election: Root %u is still alive!\n",
                     TOS_NODE_ID, senderID);
                 signal TreeTopology.forwardSavedEpoch(FALSE, call DisseminationTimer.getNow());
-                if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                scheduleNextOrCheckSleepRoutingRx();
                 return;
             }
 
@@ -516,7 +644,7 @@ implementation {
                     (isRoot || (parentID < INVALID_NODE_ID && curdepth < DEPTH_ROOT_PROBE))) {
                     call DisseminationTimer.startOneShot(HOP_DELAY_MILLIS + (TOS_NODE_ID % 8) * 5);
                 }
-                if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                scheduleNextOrCheckSleepRoutingRx();
                 return;
             }
 
@@ -525,7 +653,7 @@ implementation {
             if (isRoot && !rootJustPromoted && msgSeq == treeSeq &&
                 msgDepth < DEPTH_ROOT_PROBE && msgRootID != TOS_NODE_ID) {
                 call DisseminationTimer.startOneShot(HOP_DELAY_MILLIS);
-                if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                scheduleNextOrCheckSleepRoutingRx();
                 return;
             }
 
@@ -536,6 +664,7 @@ implementation {
                 uint16_t prevRootID = currentRootID;
                 bool wasPromotedRoot = (isRoot && rootJustPromoted);
                 treeJoinTime = now;
+                hasTreeJoinTime = TRUE;
 
                 signal TreeTopology.onAdoptSuperiorTree(wasPromotedRoot, prevRootID, msgRootID, now);
 
@@ -552,6 +681,8 @@ implementation {
                 orphanPullPending = FALSE;
                 orphanPhase = ORPHAN_NONE;
                 orphanMaxNeighborDepth = DEPTH_UNATTACHED;
+                myShedPending = FALSE;
+                shedBeaconRetryCount = 0;
                 call BackupTable.clear();
                 parentID = INVALID_NODE_ID;
                 curdepth = DEPTH_UNATTACHED;
@@ -562,7 +693,7 @@ implementation {
             if (!isRoot && msgSeq == treeSeq && curdepth == DEPTH_UNATTACHED &&
                 (orphanPhase == ORPHAN_PULL_P1 || orphanPhase == ORPHAN_WAIT_P1) &&
                 msgDepth > orphanMaxNeighborDepth) {
-                if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                scheduleNextOrCheckSleepRoutingRx();
                 return;
             }
 
@@ -571,10 +702,12 @@ implementation {
                 call BackupTable.updateCandidate(senderID, msgDepth, parentID, curdepth);
             }
 
+            parentShed = (parentID < INVALID_NODE_ID && senderID == parentID && msgShed != 0);
+
             // 4. Parent selection or current-parent depth update
             if (!isRoot && msgSeq == treeSeq &&
                 (parentID >= INVALID_NODE_ID || curdepth > offeredDepth ||
-                 (senderID == parentID && curdepth != offeredDepth))) {
+                 (senderID == parentID && (curdepth != offeredDepth || parentShed)))) {
 
                 uint32_t now = call DisseminationTimer.getNow();
                 uint16_t epCounter;
@@ -584,17 +717,25 @@ implementation {
                 // If current parent increased its depth, prefer a strictly shallower backup;
                 // otherwise smoothly adopt a small (+1..+2) depth increase without detaching.
                 if (senderID == parentID && offeredDepth > curdepth) {
+                    uint16_t oldParent = parentID;
+
                     if (call TreeTopology.tryFailoverToBackup()) {
+                        if (parentShed) {
+                            signal TreeTopology.prepareParentInvalidated(oldParent, now);
+                        }
                         signal TreeTopology.forwardSavedEpoch(FALSE, now);
-                        if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                        scheduleNextOrCheckSleepRoutingRx();
                         return;
                     }
                     if (offeredDepth > curdepth + 2 || offeredDepth >= DEPTH_ROOT_PROBE) {
                         dbg("SRTreeC", "Node %u parent %u depth jumped (%u -> %u); detaching\n",
                             TOS_NODE_ID, senderID, curdepth, offeredDepth);
                         handleParentInvalidated(now);
-                        if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                        scheduleNextOrCheckSleepRoutingRx();
                         return;
+                    }
+                    if (parentShed) {
+                        signal TreeTopology.prepareParentInvalidated(parentID, now);
                     }
                     curdepth = offeredDepth;
                     call BackupTable.remove(parentID);
@@ -607,13 +748,17 @@ implementation {
                     if (!electionPending && !rootJustPromoted) {
                         call DisseminationTimer.startOneShot(HOP_DELAY_MILLIS + (uint32_t)(TOS_NODE_ID % 8) * 3);
                     }
-                    if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                    scheduleNextOrCheckSleepRoutingRx();
                     return;
                 }
 
                 if (offeredDepth >= DEPTH_ROOT_PROBE) {
-                    if (!(call RoutingReceiveQueue.empty())) post receiveRoutingTask();
+                    scheduleNextOrCheckSleepRoutingRx();
                     return;
+                }
+
+                if (senderID == parentID && parentShed) {
+                    signal TreeTopology.prepareParentInvalidated(parentID, now);
                 }
 
                 parentID = senderID;
@@ -641,27 +786,28 @@ implementation {
                 signal TreeTopology.forwardSavedEpoch(isSuperiorTree, now);
 
                 // Propagate routing advertisement downward:
-                // - Tight fast-relay (8..14 ms) for new-Root failover waves so lower-ID winners suppress
-                //   distant election timers across multi-hop paths before secondary promotions occur
+                // - Fast relay (8..14 ms) when clearing post-orphan shed beacons
+                // - Staggered post-burst relay (16..51 ms) for new-Root failover waves so
+                //   relays avoid the 0..15 ms forwardSavedEpoch burst and colliding siblings
                 // - Standard fast propagation (8..29 ms) on post-boot orphan/reattach events
                 // - Standard TIMER_FAST_PERIOD (+ jitter post-boot) otherwise
                 epCounter = signal TreeTopology.getEpochCounter();
                 if (!electionPending && !rootJustPromoted) {
-                    uint32_t advDelay = (isSuperiorTree && epCounter > 0)
+                    uint32_t advDelay = myShedPending
                         ? (HOP_DELAY_MILLIS + (uint32_t)(TOS_NODE_ID % 4) * 2)
-                        : ((wasOrphanPull || (wasUnattached && epCounter > 0))
-                            ? (HOP_DELAY_MILLIS + (uint32_t)(TOS_NODE_ID % 8) * 3)
-                            : ((epCounter > 0)
-                                ? (TIMER_FAST_PERIOD + (uint32_t)(TOS_NODE_ID % 8) * 5)
-                                : TIMER_FAST_PERIOD));
+                        : ((isSuperiorTree && epCounter > 0)
+                            ? ((2 * HOP_DELAY_MILLIS) + (uint32_t)(TOS_NODE_ID % 8) * 5)
+                            : ((wasOrphanPull || (wasUnattached && epCounter > 0))
+                                ? (HOP_DELAY_MILLIS + (uint32_t)(TOS_NODE_ID % 8) * 3)
+                                : ((epCounter > 0)
+                                    ? (TIMER_FAST_PERIOD + (uint32_t)(TOS_NODE_ID % 8) * 5)
+                                    : TIMER_FAST_PERIOD)));
                     call DisseminationTimer.startOneShot(advDelay);
                 }
             }
         }
 
-        if (!(call RoutingReceiveQueue.empty())) {
-            post receiveRoutingTask();
-        }
+        scheduleNextOrCheckSleepRoutingRx();
     }
 }
 
