@@ -1,34 +1,46 @@
 ============================================================================
-  TinyOS/TOSSIM TAG Automated Verification Suite (19 Scenarios)
+  TinyOS/TOSSIM TAG Automated Verification Suite (27 Scenarios)
 ============================================================================
 
 --- Group 1: Query Sweep ---
-[PASS] ( 1/19) T01_Query_SUM_3x3_R1.5                       (3.94s) WORKER_OK query=SUM epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
-[PASS] ( 2/19) T02_Query_AVG_3x3_R1.5                       (4.22s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
-[PASS] ( 3/19) T03_Query_VARIANCE_3x3_R1.5                  (9.89s) WORKER_OK query=VARIANCE epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
-[PASS] ( 4/19) T04_Query_MAX_3x3_R1.5                       (12.70s) WORKER_OK query=MAX epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] ( 1/27) T01_Query_SUM_3x3_R1.5                       (5.98s) WORKER_OK query=SUM epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=2 stops=8..8
+[PASS] ( 2/27) T02_Query_AVG_3x3_R1.5                       (5.35s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=4 stops=8..8
+[PASS] ( 3/27) T03_Query_VARIANCE_3x3_R1.5                  (4.88s) WORKER_OK query=VARIANCE epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=4 stops=8..8
+[PASS] ( 4/27) T04_Query_MAX_3x3_R1.5                       (5.01s) WORKER_OK query=MAX epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=2 stops=8..8
 
 --- Group 2: Topologies & Scale ---
-[PASS] ( 5/19) T05_Grid_3x3_Orthogonal_R1.0                 (6.48s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
-[PASS] ( 6/19) T06_Grid_4x4_Diagonal_R1.5                   (7.90s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
-[PASS] ( 7/19) T07_Grid_4x4_Orthogonal_R1.0                 (21.82s) WORKER_OK query=SUM epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
-[PASS] ( 8/19) T08_Grid_5x5_Diagonal_R1.5                   (24.76s) WORKER_OK query=VARIANCE epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
-[PASS] ( 9/19) T09_Star_HighFanout_13Nodes                  (13.45s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
-[PASS] (10/19) T10_Linear_Chain_6Nodes                      (6.93s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
+[PASS] ( 5/27) T05_Grid_3x3_Orthogonal_R1.0                 (5.05s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=7 stops=8..8
+[PASS] ( 6/27) T06_Grid_4x4_Diagonal_R1.5                   (46.27s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=7 stops=8..8
+[PASS] ( 7/27) T07_Grid_4x4_Orthogonal_R1.0                 (57.68s) WORKER_OK query=SUM epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=8 stops=8..8
+[PASS] ( 8/27) T08_Grid_5x5_Diagonal_R1.5                   (59.91s) WORKER_OK query=VARIANCE epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=12 stops=8..8
+[PASS] ( 9/27) T09_Star_HighFanout_13Nodes                  (42.93s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=24 stops=8..8
+[PASS] (10/27) T10_Linear_Chain_6Nodes                      (12.30s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=1 stops=8..8
 
 --- Group 3: Intermediate Failures ---
-[PASS] (11/19) T11_Leaf_Node_Death_3x3                      (12.98s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0
-[PASS] (12/19) T12_Hub_Death_Backup_And_Orphan_3x3          (12.40s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=2 orphans=1 elections=0
-[PASS] (13/19) T13_Orthogonal_Hub_Death_No_Shallower_Backups (13.21s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=2 orphans=1 elections=0
-[PASS] (14/19) T14_Cascading_Hub_Deaths_Phase2_Orphan       (13.19s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=4 orphans=3 elections=0
-[PASS] (15/19) T15_Large_Grid_4x4_Dual_Hub_Failure          (23.52s) WORKER_OK query=SUM epoch_dur=100s epochs=8 failovers=2 orphans=1 elections=0
+[PASS] (11/27) T11_Leaf_Node_Death_3x3                      (4.67s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=9 stops=8..8
+[PASS] (12/27) T12_Hub_Death_Backup_And_Orphan_3x3          (4.70s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=1 elections=0 retries=9 stops=8..8
+[PASS] (13/27) T13_Orthogonal_Hub_Death_No_Shallower_Backups (4.94s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=1 elections=0 retries=7 stops=8..8
+[PASS] (14/27) T14_Cascading_Hub_Deaths_Phase2_Orphan       (5.46s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=2 orphans=3 elections=0 retries=28 stops=8..8
+[PASS] (15/27) T15_Large_Grid_4x4_Dual_Hub_Failure          (9.52s) WORKER_OK query=SUM epoch_dur=100s epochs=8 failovers=3 orphans=1 elections=0 retries=28 stops=8..8
 
 --- Group 4: Root Elections & Partitions ---
-[PASS] (16/19) T16_Root0_Failure_Election_3x3               (10.20s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=1
-[PASS] (17/19) T17_Consecutive_Root_Failures_0_Then_1       (13.52s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=2
-[PASS] (18/19) T18_Combined_Chaos_Hub_Plus_Root_Death       (12.80s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=1 elections=1
-[PASS] (19/19) T19_Bridge_CutVertex_Network_Partition       (8.13s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=2 elections=0
+[PASS] (16/27) T16_Root0_Failure_Election_3x3               (5.34s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=1 retries=18 stops=8..8
+[PASS] (17/27) T17_Consecutive_Root_Failures_0_Then_1       (5.50s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=2 retries=41 stops=8..8
+[PASS] (18/27) T18_Combined_Chaos_Hub_Plus_Root_Death       (5.40s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=2 orphans=1 elections=1 retries=28 stops=8..8
+[PASS] (19/27) T19_Bridge_CutVertex_Network_Partition       (4.07s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=2 elections=0 retries=12 stops=8..8
+
+--- Group 5: Radio Duty-Cycling ---
+[PASS] (20/27) T20_DutyCycle_Lifecycle_30s_Epochs           (5.36s) WORKER_OK query=AVG epoch_dur=30s epochs=27 failovers=0 orphans=0 elections=0 retries=13 stops=27..27
+
+--- Group 6: Hardened Stress & Edge Cases ---
+[PASS] (21/27) T21_Lossy_Asymmetric_RF_3x3_R1.5             (4.86s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=0 retries=10 stops=8..8
+[PASS] (22/27) T22_TreeSeq_Mod8_Wraparound_4x4              (10.98s) WORKER_OK query=AVG epoch_dur=30s epochs=27 failovers=0 orphans=0 elections=8 retries=146 stops=27..27
+[PASS] (23/27) T23_Variance_Chaos_Hub_Plus_Root_Death       (5.85s) WORKER_OK query=VARIANCE epoch_dur=100s epochs=8 failovers=0 orphans=1 elections=1 retries=16 stops=8..8
+[PASS] (24/27) T24_Max_Chaos_Hub_Plus_Root_Death            (5.84s) WORKER_OK query=MAX epoch_dur=100s epochs=8 failovers=4 orphans=1 elections=1 retries=39 stops=8..8
+[PASS] (25/27) T25_ShortEpoch_30s_Hub_And_Root_Faults       (6.26s) WORKER_OK query=AVG epoch_dur=30s epochs=27 failovers=4 orphans=1 elections=1 retries=45 stops=27..27
+[PASS] (26/27) T26_Bootstrap_Fault_Hub_Death_3x3            (6.04s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=2 orphans=1 elections=0 retries=19 stops=8..8
+[PASS] (27/27) T27_MidElection_Candidate_Death_3x3          (5.65s) WORKER_OK query=AVG epoch_dur=100s epochs=8 failovers=0 orphans=0 elections=1 retries=17 stops=8..8
 
 ============================================================================
-  SUMMARY: 19/19 PASSED, 0 FAILED (Total time: 232.04s)
+  SUMMARY: 27/27 PASSED, 0 FAILED (Total time: 345.81s)
 ============================================================================

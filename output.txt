@@ -1,318 +1,361 @@
 TicksPerSecond :  10000000000 
 
-Detected  9  nodes in topology.txt (random seed offset = 1 )
+Detected  9  nodes in topology.txt (random seed offset = 4 )
 
-0:0:10.000000000 DEBUG (0): ROOT (Node 0) booted: selected Query=2 (AVG), EpochDuration=100 sec
+0:0:10.000000000 DEBUG (0): ROOT (Node 0) booted: selected Query=3 (VARIANCE), EpochDuration=90 sec
 0:0:10.000000000 DEBUG (1): Sensor Node 1 booted: curdepth=31, parentID=65535
 0:0:10.000000000 DEBUG (2): Sensor Node 2 booted: curdepth=31, parentID=65535
 0:0:10.000000000 DEBUG (3): Sensor Node 3 booted: curdepth=31, parentID=65535
 0:0:10.000000000 DEBUG (4): Sensor Node 4 booted: curdepth=31, parentID=65535
 0:0:10.000000000 DEBUG (5): Sensor Node 5 booted: curdepth=31, parentID=65535
-0:0:10.000000000 DEBUG (6): Sensor Node 6 booted: curdepth=31, parentID=65535
-0:0:10.000000000 DEBUG (7): Sensor Node 7 booted: curdepth=31, parentID=65535
-0:0:10.000000000 DEBUG (8): Sensor Node 8 booted: curdepth=31, parentID=65535
+0:0:10.000000001 DEBUG (6): Sensor Node 6 booted: curdepth=31, parentID=65535
+0:0:10.000000001 DEBUG (7): Sensor Node 7 booted: curdepth=31, parentID=65535
+0:0:10.000000001 DEBUG (8): Sensor Node 8 booted: curdepth=31, parentID=65535
 0:0:10.000000010 DEBUG (0): Radio initialized successfully!
 0:0:10.000000010 DEBUG (1): Radio initialized successfully!
 0:0:10.000000010 DEBUG (2): Radio initialized successfully!
 0:0:10.000000010 DEBUG (3): Radio initialized successfully!
 0:0:10.000000010 DEBUG (4): Radio initialized successfully!
 0:0:10.000000010 DEBUG (5): Radio initialized successfully!
-0:0:10.000000010 DEBUG (6): Radio initialized successfully!
-0:0:10.000000010 DEBUG (7): Radio initialized successfully!
-0:0:10.000000010 DEBUG (8): Radio initialized successfully!
+0:0:10.000000011 DEBUG (6): Radio initialized successfully!
+0:0:10.000000011 DEBUG (7): Radio initialized successfully!
+0:0:10.000000011 DEBUG (8): Radio initialized successfully!
 0:0:10.195312510 DEBUG (0): ####################################################
-0:0:10.195312510 DEBUG (0): ### TAG DISSEMINATION START: Query=AVG, Epoch=100s ###
+0:0:10.195312510 DEBUG (0): ### TAG DISSEMINATION START: Query=VARIANCE, Epoch=90s ###
 0:0:10.195312510 DEBUG (0): ####################################################
-0:0:10.197952295 DEBUG (4): Node 4 selected parentID=0, depth=1 (treeSeq=0, root=0, Query=AVG, Epoch=100s)
-0:0:10.197952295 DEBUG (1): Node 1 selected parentID=0, depth=1 (treeSeq=0, root=0, Query=AVG, Epoch=100s)
-0:0:10.197952295 DEBUG (3): Node 3 selected parentID=0, depth=1 (treeSeq=0, root=0, Query=AVG, Epoch=100s)
-0:0:10.399124137 DEBUG (5): Node 5 selected parentID=1, depth=2 (treeSeq=0, root=0, Query=AVG, Epoch=100s)
-0:0:10.399124137 DEBUG (2): Node 2 selected parentID=1, depth=2 (treeSeq=0, root=0, Query=AVG, Epoch=100s)
-0:0:10.401077251 DEBUG (7): Node 7 selected parentID=3, depth=2 (treeSeq=0, root=0, Query=AVG, Epoch=100s)
-0:0:10.401077251 DEBUG (6): Node 6 selected parentID=3, depth=2 (treeSeq=0, root=0, Query=AVG, Epoch=100s)
-0:0:10.401946997 DEBUG (8): Node 8 selected parentID=4, depth=2 (treeSeq=0, root=0, Query=AVG, Epoch=100s)
-0:0:14.742187510 DEBUG (8): Epoch 1 | Node 8 (depth 2, parent 4) sampled local reading = 88
-0:0:14.750000010 DEBUG (7): Epoch 1 | Node 7 (depth 2, parent 3) sampled local reading = 70
-0:0:14.751708969 DEBUG (4): Node 4 rx AvgMsg (3B) from child 8: (sum=88, cnt=1) -> running=(88, 1)
-0:0:14.755126964 DEBUG (3): Node 3 rx AvgMsg (3B) from child 7: (sum=70, cnt=1) -> running=(70, 1)
-0:0:14.757812510 DEBUG (6): Epoch 1 | Node 6 (depth 2, parent 3) sampled local reading = 51
-0:0:14.761596698 DEBUG (3): Node 3 rx AvgMsg (3B) from child 6: (sum=51, cnt=1) -> running=(121, 2)
-0:0:14.765625010 DEBUG (5): Epoch 1 | Node 5 (depth 2, parent 1) sampled local reading = 69
-0:0:14.775772076 DEBUG (1): Node 1 rx AvgMsg (3B) from child 5: (sum=69, cnt=1) -> running=(69, 1)
-0:0:14.789062510 DEBUG (2): Epoch 1 | Node 2 (depth 2, parent 1) sampled local reading = 14
-0:0:14.791229275 DEBUG (1): Node 1 rx AvgMsg (3B) from child 2: (sum=14, cnt=1) -> running=(83, 2)
-0:0:14.968750010 DEBUG (4): Epoch 1 | Node 4 (depth 1, parent 0) sampled local reading = 51
-0:0:14.973846446 DEBUG (0): Node 0 rx AvgMsg (3B) from child 4: (sum=139, cnt=2) -> running=(139, 2)
-0:0:14.976562510 DEBUG (3): Epoch 1 | Node 3 (depth 1, parent 0) sampled local reading = 33
-0:0:14.987365700 DEBUG (0): Node 0 rx AvgMsg (3B) from child 3: (sum=154, cnt=3) -> running=(293, 5)
-0:0:14.992187510 DEBUG (1): Epoch 1 | Node 1 (depth 1, parent 0) sampled local reading = 96
-0:0:15.000595083 DEBUG (0): Node 0 rx AvgMsg (3B) from child 1: (sum=179, cnt=3) -> running=(472, 8)
-0:0:15.195312510 DEBUG (0): Epoch 1 | Node 0 (depth 0, parent 0) sampled local reading = 64
-0:0:15.195312510 DEBUG (0): >>> [EPOCH 1 RESULT (Root=0) | Query=AVG | EpochDur=100s] Final AVG = 59.56 (Sum=536, Count=9) <<<
+0:0:10.199646011 DEBUG (4): Node 4 selected parentID=0, depth=1 (treeSeq=0, root=0, Query=VARIANCE, Epoch=90s)
+0:0:10.199646011 DEBUG (1): Node 1 selected parentID=0, depth=1 (treeSeq=0, root=0, Query=VARIANCE, Epoch=90s)
+0:0:10.199646011 DEBUG (3): Node 3 selected parentID=0, depth=1 (treeSeq=0, root=0, Query=VARIANCE, Epoch=90s)
+0:0:10.398635870 DEBUG (5): Node 5 selected parentID=1, depth=2 (treeSeq=0, root=0, Query=VARIANCE, Epoch=90s)
+0:0:10.398635870 DEBUG (2): Node 2 selected parentID=1, depth=2 (treeSeq=0, root=0, Query=VARIANCE, Epoch=90s)
+0:0:10.400619502 DEBUG (7): Node 7 selected parentID=4, depth=2 (treeSeq=0, root=0, Query=VARIANCE, Epoch=90s)
+0:0:10.400619502 DEBUG (8): Node 8 selected parentID=4, depth=2 (treeSeq=0, root=0, Query=VARIANCE, Epoch=90s)
+0:0:10.403701759 DEBUG (6): Node 6 selected parentID=3, depth=2 (treeSeq=0, root=0, Query=VARIANCE, Epoch=90s)
+0:0:14.742187511 DEBUG (8): Epoch 1 | Node 8 (depth 2, parent 4) sampled local reading = 65
+0:0:14.750000011 DEBUG (7): Epoch 1 | Node 7 (depth 2, parent 4) sampled local reading = 47
+0:0:14.750350945 DEBUG (4): Node 4 rx VarMsg (7B) from child 8: (sum=65, sumSq=4225, cnt=1)
+0:0:14.757812511 DEBUG (6): Epoch 1 | Node 6 (depth 2, parent 3) sampled local reading = 29
+0:0:14.758209221 DEBUG (4): Node 4 rx VarMsg (7B) from child 7: (sum=47, sumSq=2209, cnt=1)
+0:0:14.764694214 DEBUG (3): Node 3 rx VarMsg (7B) from child 6: (sum=29, sumSq=841, cnt=1)
+0:0:14.765625010 DEBUG (5): Epoch 1 | Node 5 (depth 2, parent 1) sampled local reading = 46
+0:0:14.775924663 DEBUG (1): Node 1 rx VarMsg (7B) from child 5: (sum=46, sumSq=2116, cnt=1)
+0:0:14.789062510 DEBUG (2): Epoch 1 | Node 2 (depth 2, parent 1) sampled local reading = 92
+0:0:14.794036876 DEBUG (1): Node 1 rx VarMsg (7B) from child 2: (sum=92, sumSq=8464, cnt=1)
+0:0:14.968750010 DEBUG (4): Epoch 1 | Node 4 (depth 1, parent 0) sampled local reading = 28
+0:0:14.972793596 DEBUG (0): Node 0 rx VarMsg (7B) from child 4: (sum=140, sumSq=7218, cnt=3)
+0:0:14.976562510 DEBUG (3): Epoch 1 | Node 3 (depth 1, parent 0) sampled local reading = 10
+0:0:14.982803349 DEBUG (0): Node 0 rx VarMsg (7B) from child 3: (sum=39, sumSq=941, cnt=2)
+0:0:14.992187510 DEBUG (1): Epoch 1 | Node 1 (depth 1, parent 0) sampled local reading = 73
+0:0:14.997970587 DEBUG (0): Node 0 rx VarMsg (7B) from child 1: (sum=211, sumSq=15909, cnt=3)
+0:0:15.195312510 DEBUG (0): Epoch 1 | Node 0 (depth 0, parent 0) sampled local reading = 28
+0:0:15.195312510 DEBUG (0): >>> [EPOCH 1 RESULT (Root=0) | Query=VARIANCE | EpochDur=90s] Final VARIANCE = 604.25 (Sum=418, SumSq=24852, Count=9) <<<
 0:0:16.171875020 DEBUG (1): Radio stopped!
 0:0:16.171875020 DEBUG (2): Radio stopped!
 0:0:16.171875020 DEBUG (3): Radio stopped!
 0:0:16.171875020 DEBUG (4): Radio stopped!
 0:0:16.171875020 DEBUG (5): Radio stopped!
-0:0:16.171875020 DEBUG (6): Radio stopped!
-0:0:16.171875020 DEBUG (7): Radio stopped!
-0:0:16.171875020 DEBUG (8): Radio stopped!
+0:0:16.171875021 DEBUG (6): Radio stopped!
+0:0:16.171875021 DEBUG (7): Radio stopped!
+0:0:16.171875021 DEBUG (8): Radio stopped!
 0:0:16.269531270 DEBUG (0): Radio stopped!
-0:1:54.205078145 DEBUG (8): Radio initialized successfully!
-0:1:54.212890645 DEBUG (7): Radio initialized successfully!
-0:1:54.220703145 DEBUG (6): Radio initialized successfully!
-0:1:54.228515645 DEBUG (5): Radio initialized successfully!
-0:1:54.251953145 DEBUG (2): Radio initialized successfully!
-0:1:54.431640645 DEBUG (4): Radio initialized successfully!
-0:1:54.439453145 DEBUG (3): Radio initialized successfully!
-0:1:54.455078145 DEBUG (1): Radio initialized successfully!
-0:1:54.658203145 DEBUG (0): Radio initialized successfully!
-0:1:54.742187510 DEBUG (8): Epoch 2 | Node 8 (depth 2, parent 4) sampled local reading = 69
-0:1:54.750000010 DEBUG (7): Epoch 2 | Node 7 (depth 2, parent 3) sampled local reading = 87
-0:1:54.752456646 DEBUG (4): Node 4 rx AvgMsg (3B) from child 8: (sum=69, cnt=1) -> running=(69, 1)
-0:1:54.754165665 DEBUG (3): Node 3 rx AvgMsg (3B) from child 7: (sum=87, cnt=1) -> running=(87, 1)
-0:1:54.757812510 DEBUG (6): Epoch 2 | Node 6 (depth 2, parent 3) sampled local reading = 50
-0:1:54.760910056 DEBUG (3): Node 3 rx AvgMsg (3B) from child 6: (sum=50, cnt=1) -> running=(137, 2)
-0:1:54.765625010 DEBUG (5): Epoch 2 | Node 5 (depth 2, parent 1) sampled local reading = 74
-0:1:54.771728520 DEBUG (1): Node 1 rx AvgMsg (3B) from child 5: (sum=74, cnt=1) -> running=(74, 1)
-0:1:54.789062510 DEBUG (2): Epoch 2 | Node 2 (depth 2, parent 1) sampled local reading = 15
-0:1:54.793045061 DEBUG (1): Node 1 rx AvgMsg (3B) from child 2: (sum=15, cnt=1) -> running=(89, 2)
-0:1:54.968750010 DEBUG (4): Epoch 2 | Node 4 (depth 1, parent 0) sampled local reading = 52
-0:1:54.976547226 DEBUG (4): Node 4 missed ACK from parent 0 (retry 1/5)
-0:1:54.976562510 DEBUG (3): Epoch 2 | Node 3 (depth 1, parent 0) sampled local reading = 37
-0:1:54.984741168 DEBUG (0): Node 0 rx AvgMsg (3B) from child 4: (sum=121, cnt=2) -> running=(121, 2)
-0:1:54.987976048 DEBUG (0): Node 0 rx AvgMsg (3B) from child 3: (sum=174, cnt=3) -> running=(295, 5)
-0:1:54.992187510 DEBUG (1): Epoch 2 | Node 1 (depth 1, parent 0) sampled local reading = 87
-0:1:54.994995141 DEBUG (0): Node 0 rx AvgMsg (3B) from child 1: (sum=176, cnt=3) -> running=(471, 8)
-0:1:55.195312510 DEBUG (0): Epoch 2 | Node 0 (depth 0, parent 0) sampled local reading = 73
-0:1:55.195312510 DEBUG (0): >>> [EPOCH 2 RESULT (Root=0) | Query=AVG | EpochDur=100s] Final AVG = 60.44 (Sum=544, Count=9) <<<
-0:1:56.171875020 DEBUG (1): Radio stopped!
-0:1:56.171875020 DEBUG (2): Radio stopped!
-0:1:56.171875020 DEBUG (3): Radio stopped!
-0:1:56.171875020 DEBUG (4): Radio stopped!
-0:1:56.171875020 DEBUG (5): Radio stopped!
-0:1:56.171875020 DEBUG (6): Radio stopped!
-0:1:56.171875020 DEBUG (7): Radio stopped!
-0:1:56.171875020 DEBUG (8): Radio stopped!
-0:1:56.269531270 DEBUG (0): Radio stopped!
-0:3:34.205078145 DEBUG (8): Radio initialized successfully!
-0:3:34.212890645 DEBUG (7): Radio initialized successfully!
-0:3:34.220703145 DEBUG (6): Radio initialized successfully!
-0:3:34.228515645 DEBUG (5): Radio initialized successfully!
-0:3:34.251953145 DEBUG (2): Radio initialized successfully!
-0:3:34.431640645 DEBUG (4): Radio initialized successfully!
-0:3:34.439453145 DEBUG (3): Radio initialized successfully!
-0:3:34.455078145 DEBUG (1): Radio initialized successfully!
-0:3:34.658203145 DEBUG (0): Radio initialized successfully!
-0:3:34.742187510 DEBUG (8): Epoch 3 | Node 8 (depth 2, parent 4) sampled local reading = 64
-0:3:34.750000010 DEBUG (7): Epoch 3 | Node 7 (depth 2, parent 3) sampled local reading = 100
-0:3:34.753051735 DEBUG (4): Node 4 rx AvgMsg (3B) from child 8: (sum=64, cnt=1) -> running=(64, 1)
-0:3:34.757812510 DEBUG (6): Epoch 3 | Node 6 (depth 2, parent 3) sampled local reading = 53
-0:3:34.759414658 DEBUG (3): Node 3 rx AvgMsg (3B) from child 7: (sum=100, cnt=1) -> running=(100, 1)
-0:3:34.763000498 DEBUG (3): Node 3 rx AvgMsg (3B) from child 6: (sum=53, cnt=1) -> running=(153, 2)
-0:3:34.765625010 DEBUG (5): Epoch 3 | Node 5 (depth 2, parent 1) sampled local reading = 77
-0:3:34.776214578 DEBUG (1): Node 1 rx AvgMsg (3B) from child 5: (sum=77, cnt=1) -> running=(77, 1)
-0:3:34.789062510 DEBUG (2): Epoch 3 | Node 2 (depth 2, parent 1) sampled local reading = 13
-0:3:34.794250498 DEBUG (1): Node 1 rx AvgMsg (3B) from child 2: (sum=13, cnt=1) -> running=(90, 2)
-0:3:34.968750010 DEBUG (4): Epoch 3 | Node 4 (depth 1, parent 0) sampled local reading = 63
-0:3:34.973770152 DEBUG (0): Node 0 rx AvgMsg (3B) from child 4: (sum=127, cnt=2) -> running=(127, 2)
-0:3:34.976562510 DEBUG (3): Epoch 3 | Node 3 (depth 1, parent 0) sampled local reading = 42
-0:3:34.986038193 DEBUG (0): Node 0 rx AvgMsg (3B) from child 3: (sum=195, cnt=3) -> running=(322, 5)
-0:3:34.992187510 DEBUG (1): Epoch 3 | Node 1 (depth 1, parent 0) sampled local reading = 73
-0:3:34.995254538 DEBUG (0): Node 0 rx AvgMsg (3B) from child 1: (sum=163, cnt=3) -> running=(485, 8)
-0:3:35.195312510 DEBUG (0): Epoch 3 | Node 0 (depth 0, parent 0) sampled local reading = 82
-0:3:35.195312510 DEBUG (0): >>> [EPOCH 3 RESULT (Root=0) | Query=AVG | EpochDur=100s] Final AVG = 63.00 (Sum=567, Count=9) <<<
-0:3:36.171875020 DEBUG (1): Radio stopped!
-0:3:36.171875020 DEBUG (2): Radio stopped!
-0:3:36.171875020 DEBUG (3): Radio stopped!
-0:3:36.171875020 DEBUG (4): Radio stopped!
-0:3:36.171875020 DEBUG (5): Radio stopped!
-0:3:36.171875020 DEBUG (6): Radio stopped!
-0:3:36.171875020 DEBUG (7): Radio stopped!
-0:3:36.171875020 DEBUG (8): Radio stopped!
-0:3:36.269531270 DEBUG (0): Radio stopped!
+0:1:44.205078146 DEBUG (8): Radio initialized successfully!
+0:1:44.212890646 DEBUG (7): Radio initialized successfully!
+0:1:44.220703146 DEBUG (6): Radio initialized successfully!
+0:1:44.228515645 DEBUG (5): Radio initialized successfully!
+0:1:44.251953145 DEBUG (2): Radio initialized successfully!
+0:1:44.431640645 DEBUG (4): Radio initialized successfully!
+0:1:44.439453145 DEBUG (3): Radio initialized successfully!
+0:1:44.455078145 DEBUG (1): Radio initialized successfully!
+0:1:44.658203145 DEBUG (0): Radio initialized successfully!
+0:1:44.742187511 DEBUG (8): Epoch 2 | Node 8 (depth 2, parent 4) sampled local reading = 56
+0:1:44.750000011 DEBUG (7): Epoch 2 | Node 7 (depth 2, parent 4) sampled local reading = 52
+0:1:44.750900258 DEBUG (4): Node 4 rx VarMsg (7B) from child 8: (sum=56, sumSq=3136, cnt=1)
+0:1:44.755157481 DEBUG (4): Node 4 rx VarMsg (7B) from child 7: (sum=52, sumSq=2704, cnt=1)
+0:1:44.755325317 DEBUG (7): Node 7 missed ACK from parent 4 (retry 1/5)
+0:1:44.757812511 DEBUG (6): Epoch 2 | Node 6 (depth 2, parent 3) sampled local reading = 26
+0:1:44.762786831 DEBUG (7): Node 7 missed ACK from parent 4 (retry 2/5)
+0:1:44.764312747 DEBUG (3): Node 3 rx VarMsg (7B) from child 6: (sum=26, sumSq=676, cnt=1)
+0:1:44.765625010 DEBUG (5): Epoch 2 | Node 5 (depth 2, parent 1) sampled local reading = 42
+0:1:44.766281084 DEBUG (7): Node 7 missed ACK from parent 4 (retry 3/5)
+0:1:44.773345943 DEBUG (1): Node 1 rx VarMsg (7B) from child 5: (sum=42, sumSq=1764, cnt=1)
+0:1:44.789062510 DEBUG (2): Epoch 2 | Node 2 (depth 2, parent 1) sampled local reading = 74
+0:1:44.792221091 DEBUG (1): Node 1 rx VarMsg (7B) from child 2: (sum=74, sumSq=5476, cnt=1)
+0:1:44.968750010 DEBUG (4): Epoch 2 | Node 4 (depth 1, parent 0) sampled local reading = 22
+0:1:44.974197396 DEBUG (0): Node 0 rx VarMsg (7B) from child 4: (sum=130, sumSq=6324, cnt=3)
+0:1:44.976562510 DEBUG (3): Epoch 2 | Node 3 (depth 1, parent 0) sampled local reading = 11
+0:1:44.981475842 DEBUG (0): Node 0 rx VarMsg (7B) from child 3: (sum=37, sumSq=797, cnt=2)
+0:1:44.992187510 DEBUG (1): Epoch 2 | Node 1 (depth 1, parent 0) sampled local reading = 80
+0:1:44.998199468 DEBUG (0): Node 0 rx VarMsg (7B) from child 1: (sum=196, sumSq=13640, cnt=3)
+0:1:45.195312510 DEBUG (0): Epoch 2 | Node 0 (depth 0, parent 0) sampled local reading = 35
+0:1:45.195312510 DEBUG (0): >>> [EPOCH 2 RESULT (Root=0) | Query=VARIANCE | EpochDur=90s] Final VARIANCE = 487.28 (Sum=398, SumSq=21986, Count=9) <<<
+0:1:46.171875020 DEBUG (1): Radio stopped!
+0:1:46.171875020 DEBUG (2): Radio stopped!
+0:1:46.171875020 DEBUG (3): Radio stopped!
+0:1:46.171875020 DEBUG (4): Radio stopped!
+0:1:46.171875020 DEBUG (5): Radio stopped!
+0:1:46.171875021 DEBUG (6): Radio stopped!
+0:1:46.171875021 DEBUG (7): Radio stopped!
+0:1:46.171875021 DEBUG (8): Radio stopped!
+0:1:46.269531270 DEBUG (0): Radio stopped!
+0:3:14.205078146 DEBUG (8): Radio initialized successfully!
+0:3:14.212890646 DEBUG (7): Radio initialized successfully!
+0:3:14.220703146 DEBUG (6): Radio initialized successfully!
+0:3:14.228515645 DEBUG (5): Radio initialized successfully!
+0:3:14.251953145 DEBUG (2): Radio initialized successfully!
+0:3:14.431640645 DEBUG (4): Radio initialized successfully!
+0:3:14.439453145 DEBUG (3): Radio initialized successfully!
+0:3:14.455078145 DEBUG (1): Radio initialized successfully!
+0:3:14.658203145 DEBUG (0): Radio initialized successfully!
+0:3:14.742187511 DEBUG (8): Epoch 3 | Node 8 (depth 2, parent 4) sampled local reading = 56
+0:3:14.745681783 DEBUG (4): Node 4 rx VarMsg (7B) from child 8: (sum=56, sumSq=3136, cnt=1)
+0:3:14.750000011 DEBUG (7): Epoch 3 | Node 7 (depth 2, parent 4) sampled local reading = 58
+0:3:14.757736202 DEBUG (4): Node 4 rx VarMsg (7B) from child 7: (sum=58, sumSq=3364, cnt=1)
+0:3:14.757812511 DEBUG (6): Epoch 3 | Node 6 (depth 2, parent 3) sampled local reading = 30
+0:3:14.764358523 DEBUG (3): Node 3 rx VarMsg (7B) from child 6: (sum=30, sumSq=900, cnt=1)
+0:3:14.765625010 DEBUG (5): Epoch 3 | Node 5 (depth 2, parent 1) sampled local reading = 39
+0:3:14.775482161 DEBUG (1): Node 1 rx VarMsg (7B) from child 5: (sum=39, sumSq=1521, cnt=1)
+0:3:14.789062510 DEBUG (2): Epoch 3 | Node 2 (depth 2, parent 1) sampled local reading = 73
+0:3:14.792419454 DEBUG (1): Node 1 rx VarMsg (7B) from child 2: (sum=73, sumSq=5329, cnt=1)
+0:3:14.968750010 DEBUG (4): Epoch 3 | Node 4 (depth 1, parent 0) sampled local reading = 21
+0:3:14.976562510 DEBUG (3): Epoch 3 | Node 3 (depth 1, parent 0) sampled local reading = 11
+0:3:14.976913445 DEBUG (0): Node 0 rx VarMsg (7B) from child 4: (sum=135, sumSq=6941, cnt=3)
+0:3:14.980041524 DEBUG (0): Node 0 rx VarMsg (7B) from child 3: (sum=41, sumSq=1021, cnt=2)
+0:3:14.992187510 DEBUG (1): Epoch 3 | Node 1 (depth 1, parent 0) sampled local reading = 82
+0:3:15.002517680 DEBUG (0): Node 0 rx VarMsg (7B) from child 1: (sum=194, sumSq=13574, cnt=3)
+0:3:15.195312510 DEBUG (0): Epoch 3 | Node 0 (depth 0, parent 0) sampled local reading = 30
+0:3:15.195312510 DEBUG (0): >>> [EPOCH 3 RESULT (Root=0) | Query=VARIANCE | EpochDur=90s] Final VARIANCE = 517.58 (Sum=400, SumSq=22436, Count=9) <<<
+0:3:16.171875020 DEBUG (1): Radio stopped!
+0:3:16.171875020 DEBUG (2): Radio stopped!
+0:3:16.171875020 DEBUG (3): Radio stopped!
+0:3:16.171875020 DEBUG (4): Radio stopped!
+0:3:16.171875020 DEBUG (5): Radio stopped!
+0:3:16.171875021 DEBUG (6): Radio stopped!
+0:3:16.171875021 DEBUG (7): Radio stopped!
+0:3:16.171875021 DEBUG (8): Radio stopped!
+0:3:16.269531270 DEBUG (0): Radio stopped!
 
 *** [FAULT INJECTION] Turning OFF Intermediate Node 4 at t = 250s ***
 
-0:5:14.205078145 DEBUG (8): Radio initialized successfully!
-0:5:14.212890645 DEBUG (7): Radio initialized successfully!
-0:5:14.220703145 DEBUG (6): Radio initialized successfully!
-0:5:14.228515645 DEBUG (5): Radio initialized successfully!
-0:5:14.251953145 DEBUG (2): Radio initialized successfully!
-0:5:14.439453145 DEBUG (3): Radio initialized successfully!
-0:5:14.455078145 DEBUG (1): Radio initialized successfully!
-0:5:14.658203145 DEBUG (0): Radio initialized successfully!
-0:5:14.742187510 DEBUG (8): Epoch 4 | Node 8 (depth 2, parent 4) sampled local reading = 64
-0:5:14.746459966 DEBUG (8): Node 8 missed ACK from parent 4 (retry 1/5)
-0:5:14.750000010 DEBUG (7): Epoch 4 | Node 7 (depth 2, parent 3) sampled local reading = 93
-0:5:14.750061030 DEBUG (8): Node 8 missed ACK from parent 4 (retry 2/5)
-0:5:14.756027191 DEBUG (8): Node 8 missed ACK from parent 4 (retry 3/5)
-0:5:14.757812510 DEBUG (6): Epoch 4 | Node 6 (depth 2, parent 3) sampled local reading = 51
-0:5:14.760986304 DEBUG (3): Node 3 rx AvgMsg (3B) from child 7: (sum=93, cnt=1) -> running=(93, 1)
-0:5:14.762542666 DEBUG (8): Node 8 missed ACK from parent 4 (retry 4/5)
-0:5:14.764663697 DEBUG (3): Node 3 rx AvgMsg (3B) from child 6: (sum=51, cnt=1) -> running=(144, 2)
-0:5:14.765319760 DEBUG (8): Node 8 missed ACK from parent 4 (retry 5/5)
-0:5:14.765625010 DEBUG (5): Epoch 4 | Node 5 (depth 2, parent 1) sampled local reading = 61
-0:5:14.770767126 DEBUG (8): ORPHAN: Node 8 lost parent 4 with no backups; sending local pull
-0:5:14.776473976 DEBUG (1): Node 1 rx AvgMsg (3B) from child 5: (sum=61, cnt=1) -> running=(61, 1)
-0:5:14.789062510 DEBUG (2): Epoch 4 | Node 2 (depth 2, parent 1) sampled local reading = 14
-0:5:14.793289200 DEBUG (1): Node 1 rx AvgMsg (3B) from child 2: (sum=14, cnt=1) -> running=(75, 2)
-0:5:14.793457035 DEBUG (2): Node 2 missed ACK from parent 1 (retry 1/5)
-0:5:14.821990942 DEBUG (8): Node 8 selected parentID=5, depth=3 (treeSeq=0, root=0, Query=AVG, Epoch=100s)
-0:5:14.827102636 DEBUG (5): Node 5 rx AvgMsg (3B) from child 8: (sum=64, cnt=1) -> running=(64, 1)
-0:5:14.829788187 DEBUG (1): Node 1 rx AvgMsg (3B) from child 5: (sum=64, cnt=1) -> running=(139, 3)
-0:5:14.976562510 DEBUG (3): Epoch 4 | Node 3 (depth 1, parent 0) sampled local reading = 52
-0:5:14.979156519 DEBUG (0): Node 0 rx AvgMsg (3B) from child 3: (sum=196, cnt=3) -> running=(196, 3)
-0:5:14.992187510 DEBUG (1): Epoch 4 | Node 1 (depth 1, parent 0) sampled local reading = 74
-0:5:15.000808705 DEBUG (0): Node 0 rx AvgMsg (3B) from child 1: (sum=213, cnt=4) -> running=(409, 7)
-0:5:15.195312510 DEBUG (0): Epoch 4 | Node 0 (depth 0, parent 0) sampled local reading = 94
-0:5:15.195312510 DEBUG (0): >>> [EPOCH 4 RESULT (Root=0) | Query=AVG | EpochDur=100s] Final AVG = 62.88 (Sum=503, Count=8) <<<
-0:5:16.171875020 DEBUG (1): Radio stopped!
-0:5:16.171875020 DEBUG (2): Radio stopped!
-0:5:16.171875020 DEBUG (3): Radio stopped!
-0:5:16.171875020 DEBUG (5): Radio stopped!
-0:5:16.171875020 DEBUG (6): Radio stopped!
-0:5:16.171875020 DEBUG (7): Radio stopped!
-0:5:16.171875020 DEBUG (8): Radio stopped!
-0:5:16.269531270 DEBUG (0): Radio stopped!
-0:6:54.009765645 DEBUG (8): Radio initialized successfully!
-0:6:54.212890645 DEBUG (7): Radio initialized successfully!
-0:6:54.220703145 DEBUG (6): Radio initialized successfully!
-0:6:54.228515645 DEBUG (5): Radio initialized successfully!
-0:6:54.251953145 DEBUG (2): Radio initialized successfully!
-0:6:54.439453145 DEBUG (3): Radio initialized successfully!
-0:6:54.455078145 DEBUG (1): Radio initialized successfully!
-0:6:54.546875010 DEBUG (8): Epoch 5 | Node 8 (depth 3, parent 5) sampled local reading = 53
-0:6:54.550308248 DEBUG (5): Node 5 rx AvgMsg (3B) from child 8: (sum=53, cnt=1) -> running=(53, 1)
-0:6:54.658203145 DEBUG (0): Radio initialized successfully!
-0:6:54.750000010 DEBUG (7): Epoch 5 | Node 7 (depth 2, parent 3) sampled local reading = 86
-0:6:54.757812510 DEBUG (6): Epoch 5 | Node 6 (depth 2, parent 3) sampled local reading = 43
-0:6:54.759765654 DEBUG (3): Node 3 rx AvgMsg (3B) from child 6: (sum=43, cnt=1) -> running=(43, 1)
-0:6:54.761795015 DEBUG (3): Node 3 rx AvgMsg (3B) from child 7: (sum=86, cnt=1) -> running=(129, 2)
-0:6:54.765625010 DEBUG (5): Epoch 5 | Node 5 (depth 2, parent 1) sampled local reading = 73
-0:6:54.775955180 DEBUG (1): Node 1 rx AvgMsg (3B) from child 5: (sum=126, cnt=2) -> running=(126, 2)
-0:6:54.789062510 DEBUG (2): Epoch 5 | Node 2 (depth 2, parent 1) sampled local reading = 15
-0:6:54.798843367 DEBUG (1): Node 1 rx AvgMsg (3B) from child 2: (sum=15, cnt=1) -> running=(141, 3)
-0:6:54.976562510 DEBUG (3): Epoch 5 | Node 3 (depth 1, parent 0) sampled local reading = 39
-0:6:54.984374994 DEBUG (0): Node 0 rx AvgMsg (3B) from child 3: (sum=168, cnt=3) -> running=(168, 3)
-0:6:54.992187510 DEBUG (1): Epoch 5 | Node 1 (depth 1, parent 0) sampled local reading = 90
-0:6:55.002273540 DEBUG (0): Node 0 rx AvgMsg (3B) from child 1: (sum=231, cnt=4) -> running=(399, 7)
-0:6:55.195312510 DEBUG (0): Epoch 5 | Node 0 (depth 0, parent 0) sampled local reading = 100
-0:6:55.195312510 DEBUG (0): >>> [EPOCH 5 RESULT (Root=0) | Query=AVG | EpochDur=100s] Final AVG = 62.38 (Sum=499, Count=8) <<<
-0:6:56.171875020 DEBUG (1): Radio stopped!
-0:6:56.171875020 DEBUG (2): Radio stopped!
-0:6:56.171875020 DEBUG (3): Radio stopped!
-0:6:56.171875020 DEBUG (5): Radio stopped!
-0:6:56.171875020 DEBUG (6): Radio stopped!
-0:6:56.171875020 DEBUG (7): Radio stopped!
-0:6:56.171875020 DEBUG (8): Radio stopped!
-0:6:56.269531270 DEBUG (0): Radio stopped!
+0:4:44.205078146 DEBUG (8): Radio initialized successfully!
+0:4:44.212890646 DEBUG (7): Radio initialized successfully!
+0:4:44.220703146 DEBUG (6): Radio initialized successfully!
+0:4:44.228515645 DEBUG (5): Radio initialized successfully!
+0:4:44.251953145 DEBUG (2): Radio initialized successfully!
+0:4:44.439453145 DEBUG (3): Radio initialized successfully!
+0:4:44.455078145 DEBUG (1): Radio initialized successfully!
+0:4:44.658203145 DEBUG (0): Radio initialized successfully!
+0:4:44.742187511 DEBUG (8): Epoch 4 | Node 8 (depth 2, parent 4) sampled local reading = 60
+0:4:44.747314454 DEBUG (8): Node 8 missed ACK from parent 4 (retry 1/5)
+0:4:44.750000011 DEBUG (7): Epoch 4 | Node 7 (depth 2, parent 4) sampled local reading = 57
+0:4:44.751312243 DEBUG (8): Node 8 missed ACK from parent 4 (retry 2/5)
+0:4:44.754089362 DEBUG (7): Node 7 missed ACK from parent 4 (retry 1/5)
+0:4:44.756835903 DEBUG (8): Node 8 missed ACK from parent 4 (retry 3/5)
+0:4:44.757812511 DEBUG (6): Epoch 4 | Node 6 (depth 2, parent 3) sampled local reading = 30
+0:4:44.760772683 DEBUG (7): Node 7 missed ACK from parent 4 (retry 2/5)
+0:4:44.765625010 DEBUG (5): Epoch 4 | Node 5 (depth 2, parent 1) sampled local reading = 33
+0:4:44.767227158 DEBUG (3): Node 3 rx VarMsg (7B) from child 6: (sum=30, sumSq=900, cnt=1)
+0:4:44.767578038 DEBUG (8): Node 8 missed ACK from parent 4 (retry 4/5)
+0:4:44.770492566 DEBUG (1): Node 1 rx VarMsg (7B) from child 5: (sum=33, sumSq=1089, cnt=1)
+0:4:44.773528966 DEBUG (7): Node 7 missed ACK from parent 4 (retry 3/5)
+0:4:44.775604159 DEBUG (7): Node 7 missed ACK from parent 4 (retry 4/5)
+0:4:44.778594829 DEBUG (8): Node 8 missed ACK from parent 4 (retry 5/5)
+0:4:44.780319108 DEBUG (7): Node 7 missed ACK from parent 4 (retry 5/5)
+0:4:44.783584479 DEBUG (7): FAILOVER: Node 7 switched from parent 4 to backup parent 3 (depth 2 -> 2)
+0:4:44.783691245 DEBUG (8): ORPHAN: Node 8 lost parent 4 with no backups; sending local pull
+0:4:44.788406259 DEBUG (3): Node 3 rx VarMsg (7B) from child 7: (sum=57, sumSq=3249, cnt=1)
+0:4:44.789062510 DEBUG (2): Epoch 4 | Node 2 (depth 2, parent 1) sampled local reading = 85
+0:4:44.792419454 DEBUG (1): Node 1 rx VarMsg (7B) from child 2: (sum=85, sumSq=7225, cnt=1)
+0:4:44.821487399 DEBUG (8): Node 8 selected parentID=7, depth=3 (treeSeq=0, root=0, Query=VARIANCE, Epoch=90s)
+0:4:44.829040476 DEBUG (8): Node 8 missed ACK from parent 7 (retry 1/5)
+0:4:44.837570109 DEBUG (7): Node 7 rx VarMsg (7B) from child 8: (sum=60, sumSq=3600, cnt=1)
+0:4:44.840743939 DEBUG (3): Node 3 rx VarMsg (7B) from child 7: (sum=60, sumSq=3600, cnt=1)
+0:4:44.976562510 DEBUG (3): Epoch 4 | Node 3 (depth 1, parent 0) sampled local reading = 12
+0:4:44.982498175 DEBUG (0): Node 0 rx VarMsg (7B) from child 3: (sum=159, sumSq=7893, cnt=4)
+0:4:44.992187510 DEBUG (1): Epoch 4 | Node 1 (depth 1, parent 0) sampled local reading = 66
+0:4:44.995239270 DEBUG (1): Node 1 missed ACK from parent 0 (retry 1/5)
+0:4:45.006347624 DEBUG (0): Node 0 rx VarMsg (7B) from child 1: (sum=184, sumSq=12670, cnt=3)
+0:4:45.195312510 DEBUG (0): Epoch 4 | Node 0 (depth 0, parent 0) sampled local reading = 30
+0:4:45.195312510 DEBUG (0): >>> [EPOCH 4 RESULT (Root=0) | Query=VARIANCE | EpochDur=90s] Final VARIANCE = 508.98 (Sum=373, SumSq=21463, Count=8) <<<
+0:4:46.171875020 DEBUG (1): Radio stopped!
+0:4:46.171875020 DEBUG (2): Radio stopped!
+0:4:46.171875020 DEBUG (3): Radio stopped!
+0:4:46.171875020 DEBUG (5): Radio stopped!
+0:4:46.171875021 DEBUG (6): Radio stopped!
+0:4:46.171875021 DEBUG (7): Radio stopped!
+0:4:46.171875021 DEBUG (8): Radio stopped!
+0:4:46.269531270 DEBUG (0): Radio stopped!
+0:6:14.009765646 DEBUG (8): Radio initialized successfully!
+0:6:14.212890646 DEBUG (7): Radio initialized successfully!
+0:6:14.220703146 DEBUG (6): Radio initialized successfully!
+0:6:14.228515645 DEBUG (5): Radio initialized successfully!
+0:6:14.251953145 DEBUG (2): Radio initialized successfully!
+0:6:14.439453145 DEBUG (3): Radio initialized successfully!
+0:6:14.455078145 DEBUG (1): Radio initialized successfully!
+0:6:14.546875011 DEBUG (8): Epoch 5 | Node 8 (depth 3, parent 7) sampled local reading = 47
+0:6:14.549423244 DEBUG (7): Node 7 rx VarMsg (7B) from child 8: (sum=47, sumSq=2209, cnt=1)
+0:6:14.658203145 DEBUG (0): Radio initialized successfully!
+0:6:14.750000011 DEBUG (7): Epoch 5 | Node 7 (depth 2, parent 3) sampled local reading = 66
+0:6:14.756301874 DEBUG (7): Node 7 missed ACK from parent 3 (retry 1/5)
+0:6:14.757812511 DEBUG (6): Epoch 5 | Node 6 (depth 2, parent 3) sampled local reading = 29
+0:6:14.761260971 DEBUG (3): Node 3 rx VarMsg (7B) from child 7: (sum=113, sumSq=6565, cnt=2)
+0:6:14.765625010 DEBUG (5): Epoch 5 | Node 5 (depth 2, parent 1) sampled local reading = 25
+0:6:14.765701288 DEBUG (3): Node 3 rx VarMsg (7B) from child 6: (sum=29, sumSq=841, cnt=1)
+0:6:14.773025510 DEBUG (1): Node 1 rx VarMsg (7B) from child 5: (sum=25, sumSq=625, cnt=1)
+0:6:14.789062510 DEBUG (2): Epoch 5 | Node 2 (depth 2, parent 1) sampled local reading = 87
+0:6:14.790954619 DEBUG (1): Node 1 rx VarMsg (7B) from child 2: (sum=87, sumSq=7569, cnt=1)
+0:6:14.976562510 DEBUG (3): Epoch 5 | Node 3 (depth 1, parent 0) sampled local reading = 15
+0:6:14.980178852 DEBUG (0): Node 0 rx VarMsg (7B) from child 3: (sum=157, sumSq=7631, cnt=4)
+0:6:14.992187510 DEBUG (1): Epoch 5 | Node 1 (depth 1, parent 0) sampled local reading = 66
+0:6:14.994979882 DEBUG (0): Node 0 rx VarMsg (7B) from child 1: (sum=178, sumSq=12550, cnt=3)
+0:6:15.195312510 DEBUG (0): Epoch 5 | Node 0 (depth 0, parent 0) sampled local reading = 35
+0:6:15.195312510 DEBUG (0): >>> [EPOCH 5 RESULT (Root=0) | Query=VARIANCE | EpochDur=90s] Final VARIANCE = 536.69 (Sum=370, SumSq=21406, Count=8) <<<
+0:6:16.171875020 DEBUG (1): Radio stopped!
+0:6:16.171875020 DEBUG (2): Radio stopped!
+0:6:16.171875020 DEBUG (3): Radio stopped!
+0:6:16.171875020 DEBUG (5): Radio stopped!
+0:6:16.171875021 DEBUG (6): Radio stopped!
+0:6:16.171875021 DEBUG (7): Radio stopped!
+0:6:16.171875021 DEBUG (8): Radio stopped!
+0:6:16.269531270 DEBUG (0): Radio stopped!
 
 *** [FAULT INJECTION] Turning OFF ROOT Node 0 at t = 450s ***
 
-0:8:34.009765645 DEBUG (8): Radio initialized successfully!
-0:8:34.212890645 DEBUG (7): Radio initialized successfully!
-0:8:34.220703145 DEBUG (6): Radio initialized successfully!
-0:8:34.228515645 DEBUG (5): Radio initialized successfully!
-0:8:34.251953145 DEBUG (2): Radio initialized successfully!
-0:8:34.439453145 DEBUG (3): Radio initialized successfully!
-0:8:34.455078145 DEBUG (1): Radio initialized successfully!
-0:8:34.546875010 DEBUG (8): Epoch 6 | Node 8 (depth 3, parent 5) sampled local reading = 58
-0:8:34.551986705 DEBUG (5): Node 5 rx AvgMsg (3B) from child 8: (sum=58, cnt=1) -> running=(58, 1)
-0:8:34.750000010 DEBUG (7): Epoch 6 | Node 7 (depth 2, parent 3) sampled local reading = 88
-0:8:34.752349880 DEBUG (3): Node 3 rx AvgMsg (3B) from child 7: (sum=88, cnt=1) -> running=(88, 1)
-0:8:34.757812510 DEBUG (6): Epoch 6 | Node 6 (depth 2, parent 3) sampled local reading = 37
-0:8:34.760986350 DEBUG (3): Node 3 rx AvgMsg (3B) from child 6: (sum=37, cnt=1) -> running=(125, 2)
-0:8:34.765625010 DEBUG (5): Epoch 6 | Node 5 (depth 2, parent 1) sampled local reading = 84
-0:8:34.767349273 DEBUG (1): Node 1 rx AvgMsg (3B) from child 5: (sum=142, cnt=2) -> running=(142, 2)
-0:8:34.767517109 DEBUG (5): Node 5 missed ACK from parent 1 (retry 1/5)
-0:8:34.789062510 DEBUG (2): Epoch 6 | Node 2 (depth 2, parent 1) sampled local reading = 17
-0:8:34.793411269 DEBUG (1): Node 1 rx AvgMsg (3B) from child 2: (sum=17, cnt=1) -> running=(159, 3)
-0:8:34.976562510 DEBUG (3): Epoch 6 | Node 3 (depth 1, parent 0) sampled local reading = 31
-0:8:34.984344467 DEBUG (3): Node 3 missed ACK from parent 0 (retry 1/5)
-0:8:34.991805981 DEBUG (3): Node 3 missed ACK from parent 0 (retry 2/5)
-0:8:34.992187510 DEBUG (1): Epoch 6 | Node 1 (depth 1, parent 0) sampled local reading = 95
-0:8:34.995224011 DEBUG (1): Node 1 missed ACK from parent 0 (retry 1/5)
-0:8:34.998031541 DEBUG (3): Node 3 missed ACK from parent 0 (retry 3/5)
-0:8:35.000884928 DEBUG (3): Node 3 missed ACK from parent 0 (retry 4/5)
-0:8:35.002380351 DEBUG (1): Node 1 missed ACK from parent 0 (retry 2/5)
-0:8:35.006332365 DEBUG (1): Node 1 missed ACK from parent 0 (retry 3/5)
-0:8:35.008621099 DEBUG (3): Node 3 missed ACK from parent 0 (retry 5/5)
-0:8:35.015670628 DEBUG (3): Node 3 (depth 1) detected ROOT 0 FAILURE! Probing & starting election timer (495 ms)
-0:8:35.018615628 DEBUG (1): Node 1 missed ACK from parent 0 (retry 4/5)
-0:8:35.020858667 DEBUG (1): Node 1 missed ACK from parent 0 (retry 5/5)
-0:8:35.029403549 DEBUG (1): Node 1 (depth 1) detected ROOT 0 FAILURE! Probing & starting election timer (215 ms)
-0:8:35.239257822 DEBUG (1): ####################################################################
-0:8:35.239257822 DEBUG (1): ### ROOT FAILOVER: Node 1 ELECTED NEW ROOT (treeSeq=1, Epoch=6) ###
-0:8:35.239257822 DEBUG (1): ####################################################################
-0:8:35.248672470 DEBUG (5): Node 5 selected parentID=1, depth=1 (treeSeq=1, root=1, Query=AVG, Epoch=100s)
-0:8:35.248672470 DEBUG (3): Node 3 selected parentID=1, depth=1 (treeSeq=1, root=1, Query=AVG, Epoch=100s)
-0:8:35.248672470 DEBUG (2): Node 2 selected parentID=1, depth=1 (treeSeq=1, root=1, Query=AVG, Epoch=100s)
-0:8:35.257186855 DEBUG (1): Node 1 rx AvgMsg (3B) from child 3: (sum=156, cnt=3) -> running=(410, 7)
-0:8:35.280532854 DEBUG (6): Node 6 selected parentID=3, depth=2 (treeSeq=1, root=1, Query=AVG, Epoch=100s)
-0:8:35.280532854 DEBUG (7): Node 7 selected parentID=3, depth=2 (treeSeq=1, root=1, Query=AVG, Epoch=100s)
-0:8:35.295852646 DEBUG (8): Node 8 selected parentID=5, depth=2 (treeSeq=1, root=1, Query=AVG, Epoch=100s)
-0:8:35.581054697 DEBUG (1): >>> [EPOCH 6 RESULT (Root=1) | Query=AVG | EpochDur=100s] Final AVG = 58.57 (Sum=410, Count=7) <<<
-0:8:36.566406270 DEBUG (2): Radio stopped!
-0:8:36.566406270 DEBUG (3): Radio stopped!
-0:8:36.566406270 DEBUG (5): Radio stopped!
-0:8:36.598632833 DEBUG (6): Radio stopped!
-0:8:36.598632833 DEBUG (7): Radio stopped!
-0:8:36.613281270 DEBUG (8): Radio stopped!
-0:8:36.655273457 DEBUG (1): Radio stopped!
-0:10:14.249023458 DEBUG (7): Radio initialized successfully!
-0:10:14.255859395 DEBUG (8): Radio initialized successfully!
-0:10:14.256835958 DEBUG (6): Radio initialized successfully!
-0:10:14.468750020 DEBUG (5): Radio initialized successfully!
-0:10:14.484375020 DEBUG (3): Radio initialized successfully!
-0:10:14.492187520 DEBUG (2): Radio initialized successfully!
-0:10:14.702148457 DEBUG (1): Radio initialized successfully!
-0:10:14.786132823 DEBUG (7): Epoch 7 | Node 7 (depth 2, parent 3) sampled local reading = 97
-0:10:14.791931159 DEBUG (3): Node 3 rx AvgMsg (3B) from child 7: (sum=97, cnt=1) -> running=(97, 1)
-0:10:14.792968760 DEBUG (8): Epoch 7 | Node 8 (depth 2, parent 5) sampled local reading = 46
-0:10:14.793945323 DEBUG (6): Epoch 7 | Node 6 (depth 2, parent 3) sampled local reading = 37
-0:10:14.797882097 DEBUG (3): Node 3 rx AvgMsg (3B) from child 6: (sum=37, cnt=1) -> running=(134, 2)
-0:10:14.801147454 DEBUG (5): Node 5 rx AvgMsg (3B) from child 8: (sum=46, cnt=1) -> running=(46, 1)
-0:10:15.005859385 DEBUG (5): Epoch 7 | Node 5 (depth 1, parent 1) sampled local reading = 90
-0:10:15.012893676 DEBUG (1): Node 1 rx AvgMsg (3B) from child 5: (sum=136, cnt=2) -> running=(136, 2)
-0:10:15.021484385 DEBUG (3): Epoch 7 | Node 3 (depth 1, parent 1) sampled local reading = 24
-0:10:15.028121949 DEBUG (1): Node 1 rx AvgMsg (3B) from child 3: (sum=158, cnt=3) -> running=(294, 5)
-0:10:15.029296885 DEBUG (2): Epoch 7 | Node 2 (depth 1, parent 1) sampled local reading = 16
-0:10:15.032745381 DEBUG (1): Node 1 rx AvgMsg (3B) from child 2: (sum=16, cnt=1) -> running=(310, 6)
-0:10:15.239257822 DEBUG (1): Epoch 7 | Node 1 (depth 0, parent 1) sampled local reading = 73
-0:10:15.239257822 DEBUG (1): >>> [EPOCH 7 RESULT (Root=1) | Query=AVG | EpochDur=100s] Final AVG = 54.71 (Sum=383, Count=7) <<<
-0:10:16.208007833 DEBUG (6): Radio stopped!
-0:10:16.208007833 DEBUG (7): Radio stopped!
-0:10:16.216796895 DEBUG (2): Radio stopped!
-0:10:16.216796895 DEBUG (3): Radio stopped!
-0:10:16.216796895 DEBUG (5): Radio stopped!
-0:10:16.222656270 DEBUG (8): Radio stopped!
-0:10:16.313476582 DEBUG (1): Radio stopped!
-0:11:54.249023458 DEBUG (7): Radio initialized successfully!
-0:11:54.255859395 DEBUG (8): Radio initialized successfully!
-0:11:54.256835958 DEBUG (6): Radio initialized successfully!
-0:11:54.468750020 DEBUG (5): Radio initialized successfully!
-0:11:54.484375020 DEBUG (3): Radio initialized successfully!
-0:11:54.492187520 DEBUG (2): Radio initialized successfully!
-0:11:54.702148457 DEBUG (1): Radio initialized successfully!
-0:11:54.786132823 DEBUG (7): Epoch 8 | Node 7 (depth 2, parent 3) sampled local reading = 91
-0:11:54.790466324 DEBUG (3): Node 3 rx AvgMsg (3B) from child 7: (sum=91, cnt=1) -> running=(91, 1)
-0:11:54.792968760 DEBUG (8): Epoch 8 | Node 8 (depth 2, parent 5) sampled local reading = 47
-0:11:54.793945323 DEBUG (6): Epoch 8 | Node 6 (depth 2, parent 3) sampled local reading = 41
-0:11:54.798217789 DEBUG (3): Node 3 rx AvgMsg (3B) from child 6: (sum=41, cnt=1) -> running=(132, 2)
-0:11:54.803710915 DEBUG (5): Node 5 rx AvgMsg (3B) from child 8: (sum=47, cnt=1) -> running=(47, 1)
-0:11:55.005859385 DEBUG (5): Epoch 8 | Node 5 (depth 1, parent 1) sampled local reading = 77
-0:11:55.014999376 DEBUG (1): Node 1 rx AvgMsg (3B) from child 5: (sum=124, cnt=2) -> running=(124, 2)
-0:11:55.021484385 DEBUG (3): Epoch 8 | Node 3 (depth 1, parent 1) sampled local reading = 18
-0:11:55.023422270 DEBUG (1): Node 1 rx AvgMsg (3B) from child 3: (sum=150, cnt=3) -> running=(274, 5)
-0:11:55.029296885 DEBUG (2): Epoch 8 | Node 2 (depth 1, parent 1) sampled local reading = 19
-0:11:55.034103405 DEBUG (1): Node 1 rx AvgMsg (3B) from child 2: (sum=19, cnt=1) -> running=(293, 6)
-0:11:55.239257822 DEBUG (1): Epoch 8 | Node 1 (depth 0, parent 1) sampled local reading = 83
-0:11:55.239257822 DEBUG (1): >>> [EPOCH 8 RESULT (Root=1) | Query=AVG | EpochDur=100s] Final AVG = 53.71 (Sum=376, Count=7) <<<
-0:11:56.208007833 DEBUG (6): Radio stopped!
-0:11:56.208007833 DEBUG (7): Radio stopped!
-0:11:56.216796895 DEBUG (2): Radio stopped!
-0:11:56.216796895 DEBUG (3): Radio stopped!
-0:11:56.216796895 DEBUG (5): Radio stopped!
-0:11:56.222656270 DEBUG (8): Radio stopped!
-0:11:56.313476582 DEBUG (1): Radio stopped!
+0:7:44.009765646 DEBUG (8): Radio initialized successfully!
+0:7:44.212890646 DEBUG (7): Radio initialized successfully!
+0:7:44.220703146 DEBUG (6): Radio initialized successfully!
+0:7:44.228515645 DEBUG (5): Radio initialized successfully!
+0:7:44.251953145 DEBUG (2): Radio initialized successfully!
+0:7:44.439453145 DEBUG (3): Radio initialized successfully!
+0:7:44.455078145 DEBUG (1): Radio initialized successfully!
+0:7:44.546875011 DEBUG (8): Epoch 6 | Node 8 (depth 3, parent 7) sampled local reading = 41
+0:7:44.551055925 DEBUG (7): Node 7 rx VarMsg (7B) from child 8: (sum=41, sumSq=1681, cnt=1)
+0:7:44.750000011 DEBUG (7): Epoch 6 | Node 7 (depth 2, parent 3) sampled local reading = 81
+0:7:44.757812511 DEBUG (6): Epoch 6 | Node 6 (depth 2, parent 3) sampled local reading = 28
+0:7:44.760711648 DEBUG (3): Node 3 rx VarMsg (7B) from child 7: (sum=122, sumSq=8242, cnt=2)
+0:7:44.765625010 DEBUG (5): Epoch 6 | Node 5 (depth 2, parent 1) sampled local reading = 25
+0:7:44.767578109 DEBUG (3): Node 3 rx VarMsg (7B) from child 6: (sum=28, sumSq=784, cnt=1)
+0:7:44.772323610 DEBUG (1): Node 1 rx VarMsg (7B) from child 5: (sum=25, sumSq=625, cnt=1)
+0:7:44.789062510 DEBUG (2): Epoch 6 | Node 2 (depth 2, parent 1) sampled local reading = 87
+0:7:44.791931176 DEBUG (1): Node 1 rx VarMsg (7B) from child 2: (sum=87, sumSq=7569, cnt=1)
+0:7:44.792099011 DEBUG (2): Node 2 missed ACK from parent 1 (retry 1/5)
+0:7:44.976562510 DEBUG (3): Epoch 6 | Node 3 (depth 1, parent 0) sampled local reading = 13
+0:7:44.980056773 DEBUG (3): Node 3 missed ACK from parent 0 (retry 1/5)
+0:7:44.985702502 DEBUG (3): Node 3 missed ACK from parent 0 (retry 2/5)
+0:7:44.992187510 DEBUG (1): Epoch 6 | Node 1 (depth 1, parent 0) sampled local reading = 64
+0:7:44.994506781 DEBUG (3): Node 3 missed ACK from parent 0 (retry 3/5)
+0:7:44.996566777 DEBUG (1): Node 1 missed ACK from parent 0 (retry 1/5)
+0:7:45.000884999 DEBUG (1): Node 1 missed ACK from parent 0 (retry 2/5)
+0:7:45.003753564 DEBUG (3): Node 3 missed ACK from parent 0 (retry 4/5)
+0:7:45.007125817 DEBUG (1): Node 1 missed ACK from parent 0 (retry 3/5)
+0:7:45.011749213 DEBUG (1): Node 1 missed ACK from parent 0 (retry 4/5)
+0:7:45.013519142 DEBUG (3): Node 3 missed ACK from parent 0 (retry 5/5)
+0:7:45.018173055 DEBUG (3): Node 3 (depth 1) detected ROOT 0 FAILURE! Probing & starting election timer (495 ms)
+0:7:45.020645046 DEBUG (1): Node 1 missed ACK from parent 0 (retry 5/5)
+0:7:45.027313107 DEBUG (1): Node 1 (depth 1) detected ROOT 0 FAILURE! Probing & starting election timer (215 ms)
+0:7:45.236328135 DEBUG (1): ####################################################################
+0:7:45.236328135 DEBUG (1): ### ROOT FAILOVER: Node 1 ELECTED NEW ROOT (treeSeq=1, Epoch=6) ###
+0:7:45.236328135 DEBUG (1): ####################################################################
+0:7:45.243804928 DEBUG (5): Node 5 selected parentID=1, depth=1 (treeSeq=1, root=1, Query=VARIANCE, Epoch=90s)
+0:7:45.243804928 DEBUG (2): Node 2 selected parentID=1, depth=1 (treeSeq=1, root=1, Query=VARIANCE, Epoch=90s)
+0:7:45.243804928 DEBUG (3): Node 3 selected parentID=1, depth=1 (treeSeq=1, root=1, Query=VARIANCE, Epoch=90s)
+0:7:45.254913292 DEBUG (1): Node 1 rx VarMsg (7B) from child 3: (sum=163, sumSq=9195, cnt=4)
+0:7:45.278671264 DEBUG (6): Node 6 selected parentID=3, depth=2 (treeSeq=1, root=1, Query=VARIANCE, Epoch=90s)
+0:7:45.278671264 DEBUG (7): Node 7 selected parentID=3, depth=2 (treeSeq=1, root=1, Query=VARIANCE, Epoch=90s)
+0:7:45.286697398 DEBUG (8): Node 8 selected parentID=5, depth=2 (treeSeq=1, root=1, Query=VARIANCE, Epoch=90s)
+0:7:45.578125010 DEBUG (1): >>> [EPOCH 6 RESULT (Root=1) | Query=VARIANCE | EpochDur=90s] Final VARIANCE = 723.96 (Sum=339, SumSq=21485, Count=7) <<<
+0:7:46.561523458 DEBUG (2): Radio stopped!
+0:7:46.561523458 DEBUG (3): Radio stopped!
+0:7:46.561523458 DEBUG (5): Radio stopped!
+0:7:46.596679708 DEBUG (6): Radio stopped!
+0:7:46.596679708 DEBUG (7): Radio stopped!
+0:7:46.604492208 DEBUG (8): Radio stopped!
+0:7:46.652343770 DEBUG (1): Radio stopped!
+0:9:14.247070333 DEBUG (7): Radio initialized successfully!
+0:9:14.247070333 DEBUG (8): Radio initialized successfully!
+0:9:14.254882833 DEBUG (6): Radio initialized successfully!
+0:9:14.463867208 DEBUG (5): Radio initialized successfully!
+0:9:14.479492208 DEBUG (3): Radio initialized successfully!
+0:9:14.487304708 DEBUG (2): Radio initialized successfully!
+0:9:14.699218770 DEBUG (1): Radio initialized successfully!
+0:9:14.784179698 DEBUG (7): Epoch 7 | Node 7 (depth 2, parent 3) sampled local reading = 85
+0:9:14.784179698 DEBUG (8): Epoch 7 | Node 8 (depth 2, parent 5) sampled local reading = 32
+0:9:14.787429831 DEBUG (5): Node 5 rx VarMsg (7B) from child 8: (sum=32, sumSq=1024, cnt=1)
+0:9:14.791992198 DEBUG (6): Epoch 7 | Node 6 (depth 2, parent 3) sampled local reading = 35
+0:9:14.793762192 DEBUG (3): Node 3 rx VarMsg (7B) from child 7: (sum=85, sumSq=7225, cnt=1)
+0:9:14.801803572 DEBUG (3): Node 3 rx VarMsg (7B) from child 6: (sum=35, sumSq=1225, cnt=1)
+0:9:15.000976573 DEBUG (5): Epoch 7 | Node 5 (depth 1, parent 1) sampled local reading = 27
+0:9:15.002868682 DEBUG (1): Node 1 rx VarMsg (7B) from child 5: (sum=59, sumSq=1753, cnt=2)
+0:9:15.016601573 DEBUG (3): Epoch 7 | Node 3 (depth 1, parent 1) sampled local reading = 15
+0:9:15.024414073 DEBUG (2): Epoch 7 | Node 2 (depth 1, parent 1) sampled local reading = 68
+0:9:15.026306136 DEBUG (1): Node 1 rx VarMsg (7B) from child 3: (sum=135, sumSq=8675, cnt=3)
+0:9:15.031738269 DEBUG (2): Node 2 missed ACK from parent 1 (retry 1/5)
+0:9:15.042632990 DEBUG (2): Node 2 missed ACK from parent 1 (retry 2/5)
+0:9:15.045104910 DEBUG (2): Node 2 missed ACK from parent 1 (retry 3/5)
+0:9:15.048522869 DEBUG (2): Node 2 missed ACK from parent 1 (retry 4/5)
+0:9:15.054885757 DEBUG (2): Node 2 missed ACK from parent 1 (retry 5/5)
+0:9:15.065704195 DEBUG (1): Node 1 rx VarMsg (7B) from child 2: (sum=68, sumSq=4624, cnt=1)
+0:9:15.236328135 DEBUG (1): Epoch 7 | Node 1 (depth 0, parent 1) sampled local reading = 53
+0:9:15.236328135 DEBUG (1): >>> [EPOCH 7 RESULT (Root=1) | Query=VARIANCE | EpochDur=90s] Final VARIANCE = 526.57 (Sum=315, SumSq=17861, Count=7) <<<
+0:9:16.206054708 DEBUG (6): Radio stopped!
+0:9:16.206054708 DEBUG (7): Radio stopped!
+0:9:16.211914083 DEBUG (2): Radio stopped!
+0:9:16.211914083 DEBUG (3): Radio stopped!
+0:9:16.211914083 DEBUG (5): Radio stopped!
+0:9:16.213867208 DEBUG (8): Radio stopped!
+0:9:16.310546895 DEBUG (1): Radio stopped!
+0:10:44.247070333 DEBUG (7): Radio initialized successfully!
+0:10:44.247070333 DEBUG (8): Radio initialized successfully!
+0:10:44.254882833 DEBUG (6): Radio initialized successfully!
+0:10:44.463867208 DEBUG (5): Radio initialized successfully!
+0:10:44.479492208 DEBUG (3): Radio initialized successfully!
+0:10:44.487304708 DEBUG (2): Radio initialized successfully!
+0:10:44.699218770 DEBUG (1): Radio initialized successfully!
+0:10:44.784179698 DEBUG (7): Epoch 8 | Node 7 (depth 2, parent 3) sampled local reading = 72
+0:10:44.784179698 DEBUG (8): Epoch 8 | Node 8 (depth 2, parent 5) sampled local reading = 37
+0:10:44.786468533 DEBUG (3): Node 3 rx VarMsg (7B) from child 7: (sum=72, sumSq=5184, cnt=1)
+0:10:44.791992198 DEBUG (6): Epoch 8 | Node 6 (depth 2, parent 3) sampled local reading = 40
+0:10:44.792236322 DEBUG (5): Node 5 rx VarMsg (7B) from child 8: (sum=37, sumSq=1369, cnt=1)
+0:10:44.802352885 DEBUG (3): Node 3 rx VarMsg (7B) from child 6: (sum=40, sumSq=1600, cnt=1)
+0:10:45.000976573 DEBUG (5): Epoch 8 | Node 5 (depth 1, parent 1) sampled local reading = 25
+0:10:45.003768945 DEBUG (1): Node 1 rx VarMsg (7B) from child 5: (sum=62, sumSq=1994, cnt=2)
+0:10:45.016601573 DEBUG (3): Epoch 8 | Node 3 (depth 1, parent 1) sampled local reading = 12
+0:10:45.023635863 DEBUG (1): Node 1 rx VarMsg (7B) from child 3: (sum=124, sumSq=6928, cnt=3)
+0:10:45.024414073 DEBUG (2): Epoch 8 | Node 2 (depth 1, parent 1) sampled local reading = 72
+0:10:45.030517583 DEBUG (1): Node 1 rx VarMsg (7B) from child 2: (sum=72, sumSq=5184, cnt=1)
+0:10:45.236328135 DEBUG (1): Epoch 8 | Node 1 (depth 0, parent 1) sampled local reading = 52
+0:10:45.236328135 DEBUG (1): >>> [EPOCH 8 RESULT (Root=1) | Query=VARIANCE | EpochDur=90s] Final VARIANCE = 440.20 (Sum=310, SumSq=16810, Count=7) <<<
+0:10:46.206054708 DEBUG (6): Radio stopped!
+0:10:46.206054708 DEBUG (7): Radio stopped!
+0:10:46.211914083 DEBUG (2): Radio stopped!
+0:10:46.211914083 DEBUG (3): Radio stopped!
+0:10:46.211914083 DEBUG (5): Radio stopped!
+0:10:46.213867208 DEBUG (8): Radio stopped!
+0:10:46.310546895 DEBUG (1): Radio stopped!
+0:12:14.247070333 DEBUG (7): Radio initialized successfully!
+0:12:14.247070333 DEBUG (8): Radio initialized successfully!
+0:12:14.254882833 DEBUG (6): Radio initialized successfully!
+0:12:14.463867208 DEBUG (5): Radio initialized successfully!
+0:12:14.479492208 DEBUG (3): Radio initialized successfully!
+0:12:14.487304708 DEBUG (2): Radio initialized successfully!
+0:12:14.699218770 DEBUG (1): Radio initialized successfully!
+0:12:14.784179698 DEBUG (7): Epoch 9 | Node 7 (depth 2, parent 3) sampled local reading = 56
+0:12:14.784179698 DEBUG (8): Epoch 9 | Node 8 (depth 2, parent 5) sampled local reading = 36
+0:12:14.788436905 DEBUG (3): Node 3 rx VarMsg (7B) from child 7: (sum=56, sumSq=3136, cnt=1)
+0:12:14.791992198 DEBUG (6): Epoch 9 | Node 6 (depth 2, parent 3) sampled local reading = 38
+0:12:14.794326764 DEBUG (5): Node 5 rx VarMsg (7B) from child 8: (sum=36, sumSq=1296, cnt=1)
+0:12:14.797210703 DEBUG (3): Node 3 rx VarMsg (7B) from child 6: (sum=38, sumSq=1444, cnt=1)
+0:12:15.000976573 DEBUG (5): Epoch 9 | Node 5 (depth 1, parent 1) sampled local reading = 24
+0:12:15.007995605 DEBUG (1): Node 1 rx VarMsg (7B) from child 5: (sum=60, sumSq=1872, cnt=2)
+0:12:15.016601573 DEBUG (3): Epoch 9 | Node 3 (depth 1, parent 1) sampled local reading = 13
+0:12:15.022811894 DEBUG (1): Node 1 rx VarMsg (7B) from child 3: (sum=107, sumSq=4749, cnt=3)
+0:12:15.024414073 DEBUG (2): Epoch 9 | Node 2 (depth 1, parent 1) sampled local reading = 57
+0:12:15.034896830 DEBUG (1): Node 1 rx VarMsg (7B) from child 2: (sum=57, sumSq=3249, cnt=1)
+0:12:15.236328135 DEBUG (1): Epoch 9 | Node 1 (depth 0, parent 1) sampled local reading = 48
+0:12:15.236328135 DEBUG (1): >>> [EPOCH 9 RESULT (Root=1) | Query=VARIANCE | EpochDur=90s] Final VARIANCE = 229.27 (Sum=272, SumSq=12174, Count=7) <<<
+0:12:16.206054708 DEBUG (6): Radio stopped!
+0:12:16.206054708 DEBUG (7): Radio stopped!
+0:12:16.211914083 DEBUG (2): Radio stopped!
+0:12:16.211914083 DEBUG (3): Radio stopped!
+0:12:16.211914083 DEBUG (5): Radio stopped!
+0:12:16.213867208 DEBUG (8): Radio stopped!
+0:12:16.310546895 DEBUG (1): Radio stopped!

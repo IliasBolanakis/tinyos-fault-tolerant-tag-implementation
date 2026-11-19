@@ -20,6 +20,7 @@ Strictly Python 2.7 compatible using built-in standard libraries only.
 
 import math
 import os
+import random
 import re
 import shutil
 import subprocess
@@ -122,6 +123,42 @@ def generate_grid_topology(D, R, filepath=DEFAULT_TOPO_FILE):
             for j in range(num_nodes):
                 if i != j and math.hypot((i // D) - (j // D), (i % D) - (j % D)) <= R:
                     f.write("%d %d -50.0\n" % (i, j))
+                    adj[i].add(j)
+    finally:
+        f.close()
+    return adj
+
+
+def generate_lossy_grid_topology(D, R, filepath=DEFAULT_TOPO_FILE):
+    """
+    Write a D x D Euclidean grid topology with heterogeneous lossy RF gains in
+    [-78.0, -68.0] dBm and asymmetric directed edges (g(u, v) != g(v, u)),
+    calibrated to stress MAC retries and asymmetric links under `meyer-heavy.txt`
+    without severing bidirectional physical connectivity.
+    """
+    adj = {}
+    num_nodes = D * D
+    for i in range(num_nodes):
+        adj[i] = set()
+    f = open(filepath, "w")
+    try:
+        for i in range(num_nodes):
+            for j in range(num_nodes):
+                if i == j:
+                    continue
+                dist = math.hypot((i // D) - (j // D), (i % D) - (j % D))
+                if dist <= R:
+                    if dist <= 1.01:
+                        if i < j:
+                            gain = -68.0 - float((i * 3 + j) % 5)
+                        else:
+                            gain = -72.0 - float((i + j * 3) % 5)
+                    else:
+                        if i < j:
+                            gain = -71.0 - float((i * 5 + j) % 4)
+                        else:
+                            gain = -75.0 - float((i + j * 2) % 4)
+                    f.write("%d %d %.1f\n" % (i, j, gain))
                     adj[i].add(j)
     finally:
         f.close()
@@ -450,6 +487,96 @@ def build_scenarios():
             "expected_epoch_dur": 30,
             "min_radio_cycles": 20,
         },
+
+        # --- Group 6: Hardened Stress & Edge Cases ---
+        {
+            "id": "T21_Lossy_Asymmetric_RF_3x3_R1.5",
+            "group": "Group 6: Hardened Stress & Edge Cases",
+            "topo": ("lossy_grid", 3, 1.5),
+            "seed": seed_avg,
+            "expected_query": "AVG",
+            "faults": [],
+            "expect_hub_failover": False,
+            "expect_root_election": False,
+            "partition_test": False,
+            "expect_lossy_rf": True,
+        },
+        {
+            "id": "T22_TreeSeq_Mod8_Wraparound_4x4",
+            "group": "Group 6: Hardened Stress & Edge Cases",
+            "topo": ("grid", 4, 1.5),
+            "seed": seed_avg_30,
+            "expected_query": "AVG",
+            "faults": [
+                (60, 0), (150, 1), (240, 2), (330, 3),
+                (420, 6), (510, 5), (600, 4), (690, 8),
+            ],
+            "expect_hub_failover": False,
+            "expect_root_election": True,
+            "partition_test": False,
+            "expected_epoch_dur": 30,
+            "min_elections": 8,
+            "expect_seq_wraparound": True,
+        },
+        {
+            "id": "T23_Variance_Chaos_Hub_Plus_Root_Death",
+            "group": "Group 6: Hardened Stress & Edge Cases",
+            "topo": ("grid", 3, 1.5),
+            "seed": seed_var,
+            "expected_query": "VARIANCE",
+            "faults": [(250, 4), (450, 0)],
+            "expect_hub_failover": True,
+            "expect_root_election": True,
+            "partition_test": False,
+        },
+        {
+            "id": "T24_Max_Chaos_Hub_Plus_Root_Death",
+            "group": "Group 6: Hardened Stress & Edge Cases",
+            "topo": ("grid", 3, 1.5),
+            "seed": seed_max,
+            "expected_query": "MAX",
+            "faults": [(250, 4), (450, 0)],
+            "expect_hub_failover": True,
+            "expect_root_election": True,
+            "partition_test": False,
+        },
+        {
+            "id": "T25_ShortEpoch_30s_Hub_And_Root_Faults",
+            "group": "Group 6: Hardened Stress & Edge Cases",
+            "topo": ("grid", 3, 1.5),
+            "seed": seed_avg_30,
+            "expected_query": "AVG",
+            "faults": [(120, 4), (360, 0)],
+            "expect_hub_failover": True,
+            "expect_root_election": True,
+            "partition_test": False,
+            "expected_epoch_dur": 30,
+            "min_radio_cycles": 20,
+        },
+        {
+            "id": "T26_Bootstrap_Fault_Hub_Death_3x3",
+            "group": "Group 6: Hardened Stress & Edge Cases",
+            "topo": ("grid", 3, 1.5),
+            "seed": seed_avg,
+            "expected_query": "AVG",
+            "faults": [(12, 4)],
+            "expect_hub_failover": True,
+            "expect_root_election": False,
+            "partition_test": False,
+        },
+        {
+            "id": "T27_MidElection_Candidate_Death_3x3",
+            "group": "Group 6: Hardened Stress & Edge Cases",
+            "topo": ("grid", 3, 1.5),
+            "seed": seed_avg,
+            "expected_query": "AVG",
+            "faults": [(250, 0), (315.12, 1)],
+            "expect_hub_failover": False,
+            "expect_root_election": True,
+            "partition_test": False,
+            "expect_mid_election_candidate": 1,
+            "expect_elected_root": 3,
+        },
     ]
 
 
@@ -519,9 +646,20 @@ RE_RES_MAX = re.compile(
 )
 
 RE_RX_PAYLOAD = re.compile(r"rx (MaxMsg|SumMsg|AvgMsg|VarMsg) \((\d+)B\)")
+RE_RX_CHILD = re.compile(
+    r"DEBUG \((\d+)\): Node \1 rx (?:MaxMsg|SumMsg|AvgMsg|VarMsg) \(\d+B\) from child (\d+):"
+)
+
+RE_MISSED_ACK = re.compile(
+    r"DEBUG \((\d+)\): Node \1 missed ACK from parent (\d+) \(retry (\d+)/(\d+)\)"
+)
+
+RE_ROOT_DETECT = re.compile(
+    r"DEBUG \((\d+)\): Node \1 \(depth 1\) detected ROOT (\d+) FAILURE!"
+)
 
 RE_FAULT = re.compile(
-    r"^\*\*\* \[FAULT INJECTION\] Turning OFF Node (\d+) at t = (\d+)s \*\*\*"
+    r"^\*\*\* \[FAULT INJECTION\] Turning OFF Node (\d+) at t = ([0-9.]+)s \*\*\*"
 )
 
 
@@ -545,6 +683,8 @@ def build_scenario_topology(topo_spec, filepath=TEST_TOPO_FILE):
     kind = topo_spec[0]
     if kind == "grid":
         return generate_grid_topology(topo_spec[1], topo_spec[2], filepath)
+    elif kind == "lossy_grid":
+        return generate_lossy_grid_topology(topo_spec[1], topo_spec[2], filepath)
     elif kind == "star":
         return generate_star_topology(topo_spec[1], filepath)
     elif kind == "chain":
@@ -555,9 +695,50 @@ def build_scenario_topology(topo_spec, filepath=TEST_TOPO_FILE):
         raise ValueError("Unknown topology spec: %r" % (topo_spec,))
 
 
+def _resolve_tossim_paths():
+    """
+    Locate the compiled TOSSIM module directory (`TOSSIM.py` / `_TOSSIMmodule.so`)
+    and `TINYOS_ROOT_DIR` so `test_suite.py` runs directly from the shared workspace
+    as well as from `/home/tinyos/local/src/tinyos-2x/apps/tinyOS`.
+    """
+    tos_dir = os.getenv("TINYOS_ROOT_DIR")
+    if not tos_dir and os.path.isdir("/home/tinyos/local/src/tinyos-2x"):
+        tos_dir = "/home/tinyos/local/src/tinyos-2x"
+
+    candidates = []
+    env_app = os.getenv("TOSSIM_APP_DIR")
+    if env_app:
+        candidates.append(env_app)
+    if tos_dir:
+        candidates.append(os.path.join(tos_dir, "apps", "tinyOS"))
+    candidates.extend([
+        "/home/tinyos/local/src/tinyos-2x/apps/tinyOS",
+        os.path.dirname(os.path.abspath(__file__)),
+    ])
+
+    for cand in candidates:
+        if cand and os.path.isdir(cand):
+            has_py = os.path.isfile(os.path.join(cand, "TOSSIM.py"))
+            has_so = os.path.isfile(os.path.join(cand, "_TOSSIMmodule.so"))
+            if has_py and has_so:
+                if cand not in sys.path:
+                    sys.path.insert(0, cand)
+                break
+
+    return tos_dir
+
+
 def run_tossim_scenario(scenario):
     """Execute a single scenario in TOSSIM and write channels + fault markers to WORKER_LOG_FILE."""
-    from TOSSIM import Tossim  # Imported inside worker so orchestrator runs cleanly anywhere
+    tos_dir = _resolve_tossim_paths()
+    try:
+        from TOSSIM import Tossim  # Imported inside worker so orchestrator runs cleanly anywhere
+    except ImportError as exc:
+        raise ImportError(
+            "Unable to import TOSSIM (%s). Build `_TOSSIMmodule.so` via `./run_tests.sh` "
+            "(or `make micaz sim` in `$TINYOS_ROOT_DIR/apps/tinyOS`) or set `TOSSIM_APP_DIR`."
+            % exc
+        )
 
     adj = build_scenario_topology(scenario["topo"], TEST_TOPO_FILE)
     num_nodes = len(adj)
@@ -586,7 +767,6 @@ def run_tossim_scenario(scenario):
         for i in range(num_nodes):
             t.getNode(i).bootAtTime(10 * t.ticksPerSecond() + i + seed_offset)
 
-        tos_dir = os.getenv("TINYOS_ROOT_DIR")
         if not tos_dir:
             raise RuntimeError("TINYOS_ROOT_DIR environment variable is not set")
         noise_path = os.path.join(tos_dir, "tos", "lib", "tossim", "noise", "meyer-heavy.txt")
@@ -619,8 +799,9 @@ def run_tossim_scenario(scenario):
 
             while fault_idx < len(faults_sorted):
                 f_sec, f_node = faults_sorted[fault_idx]
-                if t.time() >= f_sec * t.ticksPerSecond():
-                    log_f.write("*** [FAULT INJECTION] Turning OFF Node %d at t = %ds ***\n" % (f_node, f_sec))
+                if t.time() >= int(round(float(f_sec) * t.ticksPerSecond())):
+                    f_str = ("%d" % f_sec) if isinstance(f_sec, int) else ("%.3f" % f_sec)
+                    log_f.write("*** [FAULT INJECTION] Turning OFF Node %d at t = %ss ***\n" % (f_node, f_str))
                     log_f.flush()
                     t.getNode(f_node).turnOff()
                     fault_idx += 1
@@ -701,11 +882,14 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
     root_query_name = None
     epoch_dur = None
     rx_payloads = []
+    rx_child_events = []     # (t_sec, parent_id, child_id)
     samples = {}             # samples[node][epoch] = (val, t_sec, depth, parent)
     epoch_results = []       # list of dicts in chronological emission order
     failover_events = []     # (node, old_p, new_p, old_d, new_d, t_sec)
     orphan_events = []       # (node, lost_p, t_sec)
-    election_events = []     # (new_root, tree_seq, epoch_num, t_sec, eligible_d1_snapshot)
+    election_events = []     # (new_root, tree_seq, epoch_num, t_sec, prev_seq, eligible_d1_snapshot)
+    missed_ack_events = []   # (node, parent, retry_idx, max_retries, t_sec)
+    root_detect_events = []  # (node, failed_root, t_sec)
     fault_times = []         # (node_id, t_sec)
     radio_state_tracker = {} # node_id -> "ON" or "OFF"
     radio_starts = {}        # node_id -> start count
@@ -780,6 +964,29 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
         m_rx = RE_RX_PAYLOAD.search(line)
         if m_rx:
             rx_payloads.append((m_rx.group(1), int(m_rx.group(2))))
+        m_rxc = RE_RX_CHILD.search(line)
+        if m_rxc:
+            rx_child_events.append((last_time, int(m_rxc.group(1)), int(m_rxc.group(2))))
+
+        m_mack = RE_MISSED_ACK.search(line)
+        if m_mack:
+            missed_ack_events.append((
+                int(m_mack.group(1)),
+                int(m_mack.group(2)),
+                int(m_mack.group(3)),
+                int(m_mack.group(4)),
+                last_time,
+            ))
+            continue
+
+        m_rdet = RE_ROOT_DETECT.search(line)
+        if m_rdet:
+            root_detect_events.append((
+                int(m_rdet.group(1)),
+                int(m_rdet.group(2)),
+                last_time,
+            ))
+            continue
 
         m_sel = RE_SELECT_PARENT.search(line)
         if m_sel:
@@ -982,6 +1189,34 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
         )
 
     # --- Invariant 5: Exact Ground-Truth Aggregation Verification ---
+    def _aggregate_matches(q_name, res_obj, sample_vals):
+        cnt = len(sample_vals)
+        s = sum(sample_vals)
+        s_sq = sum(v * v for v in sample_vals)
+        avg = round(float(s) / float(cnt), 2)
+        m = float(s) / float(cnt)
+        m_sq = float(s_sq) / float(cnt)
+        var = round(max(0.0, m_sq - m * m), 2)
+        mx = max(sample_vals)
+        if q_name == "SUM":
+            return res_obj["sum"] == s
+        elif q_name == "AVG":
+            return (
+                res_obj["count"] == cnt
+                and res_obj["sum"] == s
+                and abs(res_obj["avg"] - avg) <= 0.02
+            )
+        elif q_name == "VARIANCE":
+            return (
+                res_obj["count"] == cnt
+                and res_obj["sum"] == s
+                and res_obj["sumSq"] == s_sq
+                and abs(res_obj["var"] - var) <= 0.05
+            )
+        elif q_name == "MAX":
+            return res_obj["max"] == mx
+        return False
+
     prev_res_time = 0.0
     for res in epoch_results:
         ep = res["epoch"]
@@ -995,11 +1230,14 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
         # Determine whether any fault occurred in this epoch interval
         faults_in_epoch = [(fn, ft) for (fn, ft) in fault_times if prev_res_time < ft <= r_time]
         is_transition = len(faults_in_epoch) > 0
-        # Check if any killed node already sampled during this epoch before dying
-        mid_tx_death = any(
-            (r_time - 3.0) <= ft <= (r_time + 0.5) and fn in samples and ep in samples[fn]
-            for (fn, ft) in faults_in_epoch
-        )
+        # Identify killed nodes that already sampled during this epoch before dying
+        mid_tx_nodes = sorted(set(
+            fn for (fn, ft) in faults_in_epoch
+            if (r_time - 3.0) <= ft <= (r_time + 0.5)
+            and fn not in alive_comp
+            and fn in samples
+            and ep in samples[fn]
+        ))
 
         # Gather ground-truth readings for alive_comp in epoch `ep`
         vals = []
@@ -1025,55 +1263,132 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
         exp_var = round(max(0.0, mean_sq - mean * mean), 2)
         exp_max = max(vals)
 
-        if not is_transition:
-            # Steady-state epoch: strict 100% mathematical accuracy required
+        if not is_transition or not mid_tx_nodes:
+            # Strict 100% mathematical accuracy across all surviving connected nodes
+            phase_label = "Steady" if not is_transition else "Transition"
             if root_query_name == "SUM":
                 # 2-byte SumMsg omits child count, so the Root only counts its local sample
                 if res["sum"] != exp_sum:
                     raise AssertionError(
-                        "[Invariant 5 Steady Epoch %d SUM] Expected Sum=%d, got Sum=%d"
-                        % (ep, exp_sum, res["sum"])
+                        "[Invariant 5 %s Epoch %d SUM] Expected Sum=%d across %s, got Sum=%d"
+                        % (phase_label, ep, exp_sum, sorted(alive_comp), res["sum"])
                     )
             elif root_query_name == "AVG":
                 if (res["count"] != exp_cnt or res["sum"] != exp_sum or
                         abs(res["avg"] - exp_avg) > 0.02):
                     raise AssertionError(
-                        "[Invariant 5 Steady Epoch %d AVG] Expected (Avg=%.2f, Sum=%d, Count=%d), got (Avg=%.2f, Sum=%d, Count=%d)"
-                        % (ep, exp_avg, exp_sum, exp_cnt, res["avg"], res["sum"], res["count"])
+                        "[Invariant 5 %s Epoch %d AVG] Expected (Avg=%.2f, Sum=%d, Count=%d) across %s, got (Avg=%.2f, Sum=%d, Count=%d)"
+                        % (phase_label, ep, exp_avg, exp_sum, exp_cnt, sorted(alive_comp), res["avg"], res["sum"], res["count"])
                     )
             elif root_query_name == "VARIANCE":
                 if (res["count"] != exp_cnt or res["sum"] != exp_sum or
                         res["sumSq"] != exp_sum_sq or abs(res["var"] - exp_var) > 0.05):
                     raise AssertionError(
-                        "[Invariant 5 Steady Epoch %d VAR] Expected (Var=%.2f, Sum=%d, SumSq=%d, Count=%d), got (Var=%.2f, Sum=%d, SumSq=%d, Count=%d)"
-                        % (ep, exp_var, exp_sum, exp_sum_sq, exp_cnt, res["var"], res["sum"], res["sumSq"], res["count"])
+                        "[Invariant 5 %s Epoch %d VAR] Expected (Var=%.2f, Sum=%d, SumSq=%d, Count=%d) across %s, got (Var=%.2f, Sum=%d, SumSq=%d, Count=%d)"
+                        % (phase_label, ep, exp_var, exp_sum, exp_sum_sq, exp_cnt, sorted(alive_comp), res["var"], res["sum"], res["sumSq"], res["count"])
                     )
             elif root_query_name == "MAX":
                 if res["max"] != exp_max:
                     raise AssertionError(
-                        "[Invariant 5 Steady Epoch %d MAX] Expected Max=%d, got Max=%d"
-                        % (ep, exp_max, res["max"])
+                        "[Invariant 5 %s Epoch %d MAX] Expected Max=%d across %s, got Max=%d"
+                        % (phase_label, ep, exp_max, sorted(alive_comp), res["max"])
                     )
         else:
-            # Transition epoch right after a fault injection
-            if root_query_name == "SUM":
-                if not mid_tx_death and res["sum"] != exp_sum:
-                    raise AssertionError(
-                        "[Invariant 5 Transition Epoch %d SUM] Expected Sum=%d across %s, got Sum=%d"
-                        % (ep, exp_sum, sorted(alive_comp), res["sum"])
+            # Tightened mid-tx transition check:
+            # Every surviving connected node NOT absorbed into a mid-TX-killed parent's
+            # volatile RAM MUST be included. For each killed node `fn` in `mid_tx_nodes`,
+            # determine the exact set `absorbed_map[fn]` of surviving nodes whose epoch `ep`
+            # reading was received by `fn`'s subtree before `fn` crashed (and never delivered
+            # to a surviving parent outside that subtree). Each `fn` atomically either:
+            #   - failed before delivering: `{fn} U absorbed_map[fn]` absent, or
+            #   - delivered before crashing: `{fn} U absorbed_map[fn]` present.
+            fault_ts_map = {}
+            for (fn, ft) in faults_in_epoch:
+                if fn not in fault_ts_map or ft < fault_ts_map[fn]:
+                    fault_ts_map[fn] = ft
+
+            absorbed_map = {}
+            for fn in mid_tx_nodes:
+                fn_kill_t = fault_ts_map[fn]
+                trapped = set([fn])
+                changed = True
+                while changed:
+                    changed = False
+                    for (t_rx, rx_par, rx_child) in rx_child_events:
+                        if rx_par in trapped and rx_child not in trapped:
+                            if rx_child in samples and ep in samples[rx_child]:
+                                smp_t = samples[rx_child][ep][1]
+                                if smp_t <= t_rx < fn_kill_t:
+                                    trapped.add(rx_child)
+                                    changed = True
+                # Exclude any descendant that still managed to re-route to a surviving
+                # parent outside `trapped` during this epoch before `r_time`
+                surv_absorbed = set()
+                for nid in (trapped & alive_comp):
+                    smp_t = samples[nid][ep][1]
+                    rerouted = any(
+                        rx_child == nid and rx_par in alive_comp and rx_par not in trapped
+                        and smp_t <= t_rx <= r_time
+                        for (t_rx, rx_par, rx_child) in rx_child_events
                     )
-            elif root_query_name != "MAX":
-                if not mid_tx_death and (res["count"] != exp_cnt or res["sum"] != exp_sum):
-                    raise AssertionError(
-                        "[Invariant 5 Transition Epoch %d %s] Expected (Sum=%d, Count=%d) across %s, got (Sum=%d, Count=%d)"
-                        % (ep, root_query_name, exp_sum, exp_cnt, sorted(alive_comp), res["sum"], res["count"])
-                    )
+                    if not rerouted:
+                        surv_absorbed.add(nid)
+                absorbed_map[fn] = surv_absorbed
+
+            mid_vals = [samples[fn][ep][0] for fn in mid_tx_nodes]
+            matched_subset = False
+            if len(mid_tx_nodes) <= 10:
+                for mask in range(1 << len(mid_tx_nodes)):
+                    lost_nodes = set()
+                    kept_nodes = set()
+                    for bit_idx, fn in enumerate(mid_tx_nodes):
+                        if mask & (1 << bit_idx):
+                            kept_nodes.add(fn)
+                            kept_nodes.update(absorbed_map[fn])
+                        else:
+                            lost_nodes.update(absorbed_map[fn])
+                    cand_nodes = (set(alive_comp) - lost_nodes) | kept_nodes
+                    cand_vals = [samples[nid][ep][0] for nid in sorted(cand_nodes)]
+                    if cand_vals and _aggregate_matches(root_query_name, res, cand_vals):
+                        matched_subset = True
+                        break
             else:
-                if not mid_tx_death and res["max"] != exp_max:
-                    raise AssertionError(
-                        "[Invariant 5 Transition Epoch %d MAX] Expected Max=%d across %s, got Max=%d"
-                        % (ep, exp_max, sorted(alive_comp), res["max"])
+                # Fallback exact bounds check if >10 nodes die simultaneously mid-tx
+                all_absorbed = set()
+                for fn in mid_tx_nodes:
+                    all_absorbed.update(absorbed_map[fn])
+                base_nodes = set(alive_comp) - all_absorbed
+                base_vals = [samples[nid][ep][0] for nid in sorted(base_nodes)]
+                base_cnt = len(base_vals)
+                base_sum = sum(base_vals)
+                base_sum_sq = sum(v * v for v in base_vals)
+                opt_vals = [samples[nid][ep][0] for nid in sorted(all_absorbed | set(mid_tx_nodes))]
+                max_extra_sum = sum(opt_vals)
+                max_extra_sq = sum(v * v for v in opt_vals)
+                if root_query_name == "SUM":
+                    matched_subset = (base_sum <= res["sum"] <= base_sum + max_extra_sum)
+                elif root_query_name == "AVG":
+                    matched_subset = (
+                        base_cnt <= res["count"] <= base_cnt + len(opt_vals)
+                        and base_sum <= res["sum"] <= base_sum + max_extra_sum
                     )
+                elif root_query_name == "VARIANCE":
+                    matched_subset = (
+                        base_cnt <= res["count"] <= base_cnt + len(opt_vals)
+                        and base_sum <= res["sum"] <= base_sum + max_extra_sum
+                        and base_sum_sq <= res["sumSq"] <= base_sum_sq + max_extra_sq
+                    )
+                elif root_query_name == "MAX":
+                    base_max = max(base_vals) if base_vals else 0
+                    matched_subset = (base_max <= res["max"] <= max([base_max] + opt_vals))
+
+            if not matched_subset:
+                raise AssertionError(
+                    "[Invariant 5 Mid-TX Transition Epoch %d %s] Reported result %r did not match "
+                    "alive_comp=%s (base Sum=%d, Count=%d) with mid_tx_nodes=%s (vals=%s, absorbed=%r)"
+                    % (ep, root_query_name, res, sorted(alive_comp), exp_sum, exp_cnt, mid_tx_nodes, mid_vals,
+                       dict((k, sorted(v)) for k, v in absorbed_map.items()))
+                )
 
         prev_res_time = r_time
 
@@ -1082,20 +1397,69 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
         if not failover_events and not orphan_events:
             raise AssertionError("[Invariant 6] Expected FAILOVER or ORPHAN recovery events after hub death, found none")
 
+    if scenario.get("expect_lossy_rf"):
+        # Parent stability check: bounded parent churn despite heterogeneous/asymmetric lossy RF
+        max_allowed_churn = 2 * num_nodes
+        total_churn = len(failover_events) + len(orphan_events)
+        if total_churn > max_allowed_churn:
+            raise AssertionError(
+                "[Invariant 6: Lossy RF Stability] Excessive parent churn (%d failovers + %d orphans > %d)"
+                % (len(failover_events), len(orphan_events), max_allowed_churn)
+            )
+
     if scenario.get("expect_root_election"):
         if not election_events:
             raise AssertionError("[Invariant 6] Expected ROOT FAILOVER election event, found none")
+        min_elections = scenario.get("min_elections", 1)
+        if len(election_events) < min_elections:
+            raise AssertionError(
+                "[Invariant 6] Expected >= %d root elections, observed %d"
+                % (min_elections, len(election_events))
+            )
+        saw_wraparound = False
         for (new_root, seq, ep, e_time, prev_seq, d1_cands) in election_events:
             if seq != ((prev_seq + 1) & 0x07):
                 raise AssertionError(
                     "[Invariant 6] Root election treeSeq did not increment mod 8: prev=%d, new=%d"
                     % (prev_seq, seq)
                 )
+            if prev_seq == 7 and seq == 0:
+                saw_wraparound = True
             if d1_cands and new_root != d1_cands[0]:
                 raise AssertionError(
                     "[Invariant 6] Elected Root Node %d was not the lowest-ID surviving Depth-1 candidate %s"
                     % (new_root, d1_cands)
                 )
+        if scenario.get("expect_seq_wraparound") and not saw_wraparound:
+            raise AssertionError(
+                "[Invariant 6] Expected treeSeq mod-8 wraparound (7 -> 0), observed sequence %s"
+                % ([(ev[4], ev[1]) for ev in election_events],)
+            )
+
+    mid_cand = scenario.get("expect_mid_election_candidate")
+    if mid_cand is not None:
+        cand_fault_ts = [ft for (fn, ft) in fault_times if fn == mid_cand]
+        if not cand_fault_ts:
+            raise AssertionError("[Invariant 6: Mid-Election] Candidate Node %d was never faulted" % mid_cand)
+        cand_detects = [dt for (dn, _, dt) in root_detect_events if dn == mid_cand and dt <= cand_fault_ts[0]]
+        if not cand_detects:
+            raise AssertionError(
+                "[Invariant 6: Mid-Election] Candidate Node %d did not detect Root failure before kill at t=%.3fs"
+                % (mid_cand, cand_fault_ts[0])
+            )
+        if any(ev[0] == mid_cand for ev in election_events):
+            raise AssertionError(
+                "[Invariant 6: Mid-Election] Killed candidate Node %d was elected before fault at t=%.3fs"
+                % (mid_cand, cand_fault_ts[0])
+            )
+
+    exp_elected = scenario.get("expect_elected_root")
+    if exp_elected is not None:
+        if not any(ev[0] == exp_elected for ev in election_events):
+            raise AssertionError(
+                "[Invariant 6: Mid-Election] Expected runner-up Node %d to be elected Root, got %s"
+                % (exp_elected, [ev[0] for ev in election_events])
+            )
 
     # --- Invariant 7: Network Partition Gracefulness (Bridge Cut-Vertex) ---
     if scenario.get("partition_test"):
@@ -1210,22 +1574,61 @@ def verify_log_invariants(scenario, adj, log_path=WORKER_LOG_FILE):
         "failovers": len(failover_events),
         "orphans": len(orphan_events),
         "elections": len(election_events),
+        "retries": len(missed_ack_events),
         "min_stops": min(surv_stops),
         "max_stops": max(surv_stops),
     }
 
 
-def run_worker(scenario_id):
+def parse_faults_arg(faults_str):
+    """Parse CLI `--faults t1:n1,t2:n2` into [(time_sec, node_id), ...]."""
+    if not faults_str or faults_str.strip() == "none":
+        return []
+    parsed = []
+    for item in faults_str.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        parts = item.split(":")
+        if len(parts) != 2:
+            raise ValueError("Invalid fault spec %r (expected time:node)" % (item,))
+        t_raw = parts[0].strip()
+        t_val = float(t_raw) if "." in t_raw else int(t_raw)
+        n_val = int(parts[1].strip())
+        parsed.append((t_val, n_val))
+    return parsed
+
+
+def format_faults_arg(faults):
+    """Serialize [(time_sec, node_id), ...] into CLI `--faults` format."""
+    if not faults:
+        return "none"
+    tokens = []
+    for f_sec, f_node in faults:
+        t_str = ("%d" % f_sec) if isinstance(f_sec, int) else ("%.3f" % f_sec)
+        tokens.append("%s:%d" % (t_str, f_node))
+    return ",".join(tokens)
+
+
+def run_worker(scenario_id, override_seed=None, override_faults=None):
     """Worker entrypoint: simulate one scenario in isolation and assert all 8 invariants."""
     if scenario_id not in SCENARIO_BY_ID:
         sys.stderr.write("Unknown scenario ID: %s\n" % scenario_id)
         sys.exit(2)
 
-    scenario = SCENARIO_BY_ID[scenario_id]
+    scenario = dict(SCENARIO_BY_ID[scenario_id])
+    if override_seed is not None:
+        q_name, _, e_dur = predict_root_config(override_seed)
+        scenario["seed"] = override_seed
+        scenario["expected_query"] = q_name
+        scenario["expected_epoch_dur"] = e_dur
+    if override_faults is not None:
+        scenario["faults"] = list(override_faults)
+
     adj = run_tossim_scenario(scenario)
     stats = verify_log_invariants(scenario, adj, WORKER_LOG_FILE)
     print(
-        "WORKER_OK query=%s epoch_dur=%ds epochs=%d failovers=%d orphans=%d elections=%d stops=%d..%d"
+        "WORKER_OK query=%s epoch_dur=%ds epochs=%d failovers=%d orphans=%d elections=%d retries=%d stops=%d..%d"
         % (
             stats["query"],
             stats["epoch_dur"],
@@ -1233,6 +1636,7 @@ def run_worker(scenario_id):
             stats["failovers"],
             stats["orphans"],
             stats["elections"],
+            stats["retries"],
             stats["min_stops"],
             stats["max_stops"],
         )
@@ -1240,12 +1644,21 @@ def run_worker(scenario_id):
 
 
 # ---------------------------------------------------------------------------
-# Subprocess Orchestrator Mode
+# Subprocess Orchestrator & Randomized Fuzzing Mode
 # ---------------------------------------------------------------------------
 
-def run_single_subprocess(scenario_id, timeout_sec):
-    """Spawn `python test_suite.py --worker <scenario_id>` with a wall-clock timeout."""
+FUZZ_SCENARIO_IDS = [
+    "T12_Hub_Death_Backup_And_Orphan_3x3",
+    "T16_Root0_Failure_Election_3x3",
+    "T18_Combined_Chaos_Hub_Plus_Root_Death",
+]
+
+
+def run_single_subprocess(scenario_id, timeout_sec, extra_args=None):
+    """Spawn `python test_suite.py --worker <scenario_id> [extra_args...]` with timeout."""
     cmd = [sys.executable, os.path.abspath(__file__), "--worker", scenario_id]
+    if extra_args:
+        cmd.extend(extra_args)
     start_t = time.time()
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
@@ -1264,6 +1677,8 @@ def run_single_subprocess(scenario_id, timeout_sec):
         time.sleep(0.2)
 
     out, _ = proc.communicate()
+    if not isinstance(out, str):
+        out = out.decode("utf-8", "replace")
     elapsed = time.time() - start_t
     rc = proc.returncode
     return (timed_out, rc, out.strip(), elapsed)
@@ -1278,6 +1693,123 @@ def cleanup_and_restore_default_topology():
                 os.remove(tmp_name)
             except OSError:
                 pass
+
+
+def _is_near_epoch_fire(t_sec, epoch_dur, margin=5.0):
+    """Return True if `t_sec` falls within `margin` seconds of any TAG epoch firing time."""
+    k = 0
+    while True:
+        ep_t = 15.2 + k * float(epoch_dur)
+        if ep_t > DEFAULT_SIM_SECONDS + margin:
+            break
+        if abs(float(t_sec) - ep_t) <= margin:
+            return True
+        k += 1
+    return False
+
+
+def _jitter_faults_for_epoch(base_faults, epoch_dur, rng):
+    """
+    Randomly jitter fault timestamps while preserving fault ordering, staying inside
+    [40, DEFAULT_SIM_SECONDS - 60], and avoiding the active +/-5s epoch collection window.
+    """
+    jittered = []
+    min_t = 40
+    max_t = DEFAULT_SIM_SECONDS - 60
+    for idx, (base_t, f_node) in enumerate(sorted(base_faults, key=lambda x: x[0])):
+        remaining = len(base_faults) - 1 - idx
+        upper_bound = max(min_t, max_t - remaining * 50)
+        cand = int(base_t) + rng.randint(-35, 35)
+        if cand < min_t:
+            cand = min_t
+        if cand > upper_bound:
+            cand = upper_bound
+        # Nudge outside any +/-5s epoch firing window
+        step = 0
+        while _is_near_epoch_fire(cand, epoch_dur, margin=5.0) and step < 40:
+            cand += 3
+            if cand > upper_bound:
+                cand = min_t + (step % max(1, (upper_bound - min_t + 1)))
+            step += 1
+        jittered.append((cand, f_node))
+        min_t = cand + 50
+    return jittered
+
+
+def run_fuzzer(num_rounds, fuzz_seed=None):
+    """
+    Execute targeted fault scenarios across `num_rounds` randomized `seed_offset`
+    values and jittered fault schedules in isolated worker processes.
+    """
+    if num_rounds < 1:
+        sys.stderr.write("--fuzz N requires N >= 1\n")
+        return 2
+    if fuzz_seed is None:
+        fuzz_seed = int(time.time()) & 0x7FFFFFFF
+    rng = random.Random(fuzz_seed)
+
+    total_trials = num_rounds * len(FUZZ_SCENARIO_IDS)
+    passed = 0
+    failed = 0
+    print(
+        "============================================================================\n"
+        "  TinyOS/TOSSIM TAG Randomized Fuzz Mode (%d rounds x %d scenarios = %d trials)\n"
+        "  Fuzz PRNG seed: %d\n"
+        "============================================================================"
+        % (num_rounds, len(FUZZ_SCENARIO_IDS), total_trials, fuzz_seed)
+    )
+
+    suite_start = time.time()
+    trial_num = 0
+    try:
+        for rnd in range(1, num_rounds + 1):
+            rand_seed = rng.randint(0, 1023)
+            pred_q, _, pred_dur = predict_root_config(rand_seed)
+            print("\n--- Fuzz Round %d/%d (seed_offset=%d -> %s, EpochDur=%ds) ---"
+                  % (rnd, num_rounds, rand_seed, pred_q, pred_dur))
+            for sc_id in FUZZ_SCENARIO_IDS:
+                trial_num += 1
+                base_sc = SCENARIO_BY_ID[sc_id]
+                j_faults = _jitter_faults_for_epoch(base_sc["faults"], pred_dur, rng)
+                faults_str = format_faults_arg(j_faults)
+                extra_args = ["--seed", str(rand_seed), "--faults", faults_str]
+
+                timed_out, rc, output, elapsed = run_single_subprocess(
+                    sc_id, DEFAULT_TIMEOUT_SEC, extra_args=extra_args
+                )
+                if not timed_out and rc == 0:
+                    passed += 1
+                    print("[PASS] (%2d/%2d) %-40s seed=%-4d faults=%-16s (%.2fs) %s"
+                          % (trial_num, total_trials, sc_id, rand_seed, faults_str, elapsed, output))
+                else:
+                    failed += 1
+                    reason = "TIMEOUT (>%ds)" % DEFAULT_TIMEOUT_SEC if timed_out else ("EXIT %d" % rc)
+                    print("[FAIL] (%2d/%2d) %-40s seed=%-4d faults=%-16s (%.2fs) [%s]"
+                          % (trial_num, total_trials, sc_id, rand_seed, faults_str, elapsed, reason))
+                    print("       Reproduce: python test_suite.py --worker %s --seed %d --faults %s"
+                          % (sc_id, rand_seed, faults_str))
+                    if output:
+                        for diag_line in output.splitlines():
+                            print("       %s" % diag_line)
+                    if os.path.exists(WORKER_LOG_FILE):
+                        fail_copy = "fail_fuzz_r%d_%s_s%d.log" % (rnd, sc_id, rand_seed)
+                        try:
+                            shutil.copyfile(WORKER_LOG_FILE, fail_copy)
+                            print("       Saved full trace to %s" % fail_copy)
+                        except IOError:
+                            pass
+
+        total_elapsed = time.time() - suite_start
+        print(
+            "\n============================================================================\n"
+            "  FUZZ SUMMARY: %d/%d PASSED, %d FAILED (Fuzz seed=%d, Total time: %.2fs)\n"
+            "============================================================================"
+            % (passed, total_trials, failed, fuzz_seed, total_elapsed)
+        )
+    finally:
+        cleanup_and_restore_default_topology()
+
+    return 0 if failed == 0 else 1
 
 
 def run_orchestrator():
@@ -1354,11 +1886,53 @@ def run_orchestrator():
     return 0 if failed == 0 else 1
 
 
+def _print_usage(prog):
+    sys.stderr.write(
+        "Usage: python %s [--worker <scenario_id> [--seed <int>] [--faults <t:n,...>]] "
+        "[--fuzz <N> [--fuzz-seed <int>]]\n" % prog
+    )
+
+
 if __name__ == "__main__":
-    if len(sys.argv) == 3 and sys.argv[1] == "--worker":
-        run_worker(sys.argv[2])
-    elif len(sys.argv) == 1:
+    argv = sys.argv
+    if len(argv) == 1:
         sys.exit(run_orchestrator())
+    elif len(argv) >= 3 and argv[1] == "--worker":
+        sc_id = argv[2]
+        ov_seed = None
+        ov_faults = None
+        i = 3
+        try:
+            while i < len(argv):
+                if argv[i] == "--seed" and i + 1 < len(argv):
+                    ov_seed = int(argv[i + 1])
+                    i += 2
+                elif argv[i] == "--faults" and i + 1 < len(argv):
+                    ov_faults = parse_faults_arg(argv[i + 1])
+                    i += 2
+                else:
+                    _print_usage(argv[0])
+                    sys.exit(2)
+        except ValueError as exc:
+            sys.stderr.write("Argument error: %s\n" % exc)
+            sys.exit(2)
+        run_worker(sc_id, override_seed=ov_seed, override_faults=ov_faults)
+    elif len(argv) >= 3 and argv[1] == "--fuzz":
+        try:
+            n_rounds = int(argv[2])
+            f_seed = None
+            i = 3
+            while i < len(argv):
+                if argv[i] == "--fuzz-seed" and i + 1 < len(argv):
+                    f_seed = int(argv[i + 1])
+                    i += 2
+                else:
+                    _print_usage(argv[0])
+                    sys.exit(2)
+        except ValueError as exc:
+            sys.stderr.write("Argument error: %s\n" % exc)
+            sys.exit(2)
+        sys.exit(run_fuzzer(n_rounds, fuzz_seed=f_seed))
     else:
-        sys.stderr.write("Usage: python %s [--worker <scenario_id>]\n" % sys.argv[0])
+        _print_usage(argv[0])
         sys.exit(2)

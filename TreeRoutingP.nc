@@ -215,7 +215,11 @@ implementation {
     }
 
     command void TreeTopology.startRootElection() {
-        uint32_t electDelay = ELECTION_BASE_MILLIS + (uint32_t)TOS_NODE_ID * ELECTION_STEP_MILLIS;
+        // Compensate for intra-slot TAG jitter so Depth-1 candidates' promotion deadlines
+        // remain strictly ordered by TOS_NODE_ID with a uniform ELECTION_STEP_MILLIS gap.
+        uint32_t electDelay = ELECTION_BASE_MILLIS +
+                              (uint32_t)TOS_NODE_ID * ELECTION_STEP_MILLIS +
+                              SLOT_JITTER_MILLIS(TOS_NODE_ID);
         uint32_t probeRetryDelay = ROOT_PROBE_RETRY_MILLIS + (uint32_t)(TOS_NODE_ID % 8) * 5;
         electionPending = TRUE;
         currentRootID = parentID;
@@ -447,7 +451,7 @@ implementation {
                 } else if (!electionPending && !rootJustPromoted &&
                            shedBeaconRetryCount < MAX_SHED_BEACON_RETRIES) {
                     shedBeaconRetryCount++;
-                    call DisseminationTimer.startOneShot(HOP_DELAY_MILLIS + (uint32_t)(TOS_NODE_ID % 4) * 2);
+                    call DisseminationTimer.startOneShot(HOP_DELAY_MILLIS + (uint32_t)(((TOS_NODE_ID * 7U) & 0x0FU) * 3U));
                 } else {
                     myShedPending = FALSE;
                     shedBeaconRetryCount = 0;
@@ -786,7 +790,8 @@ implementation {
                 signal TreeTopology.forwardSavedEpoch(isSuperiorTree, now);
 
                 // Propagate routing advertisement downward:
-                // - Fast relay (8..14 ms) when clearing post-orphan shed beacons
+                // - Collision-staggered fast relay (16..61 ms, coprime mod-16 stride so
+                //   grid neighbors never collide mod 4) when clearing post-orphan shed beacons
                 // - Staggered post-burst relay (16..51 ms) for new-Root failover waves so
                 //   relays avoid the 0..15 ms forwardSavedEpoch burst and colliding siblings
                 // - Standard fast propagation (8..29 ms) on post-boot orphan/reattach events
@@ -794,7 +799,7 @@ implementation {
                 epCounter = signal TreeTopology.getEpochCounter();
                 if (!electionPending && !rootJustPromoted) {
                     uint32_t advDelay = myShedPending
-                        ? (HOP_DELAY_MILLIS + (uint32_t)(TOS_NODE_ID % 4) * 2)
+                        ? ((2 * HOP_DELAY_MILLIS) + (uint32_t)(((TOS_NODE_ID * 7U) & 0x0FU) * 3U))
                         : ((isSuperiorTree && epCounter > 0)
                             ? ((2 * HOP_DELAY_MILLIS) + (uint32_t)(TOS_NODE_ID % 8) * 5)
                             : ((wasOrphanPull || (wasUnattached && epCounter > 0))

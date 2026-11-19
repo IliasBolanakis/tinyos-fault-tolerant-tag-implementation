@@ -59,8 +59,8 @@ enum {
     DUP_RETRY_WINDOW_MILLIS = 500,
     MAX_MAC_RETRIES = 5,
     MAX_PARENT_FAILS = 1,
-    ELECTION_BASE_MILLIS = 75,
-    ELECTION_STEP_MILLIS = 140,
+    ELECTION_BASE_MILLIS = 140,
+    ELECTION_STEP_MILLIS = 75,
     ROOT_PROBE_RETRY_MILLIS = 55,
     ROOT_PROBE_REPLY_MILLIS = 50,
     ROOT_RECOVERY_DELAY = 350,
@@ -105,9 +105,13 @@ typedef enum {
 
 /**
  * @brief Intra-slot deterministic transmission stagger across 16 ID buckets
- *        (0..120 ms within a 200 ms TAG level slot) to reduce CSMA collisions.
+ *        (0..120 ms within a 200 ms TAG level slot) using a 4-bit bit-reversed
+ *        coprime permutation so adjacent/hidden-terminal siblings at the same
+ *        tree depth are separated by 16..48 ms rather than colliding 8 ms apart.
  */
-#define SLOT_JITTER_MILLIS(id) ((uint32_t)((id) % 16) * SLOT_JITTER_STEP)
+#define SLOT_JITTER_BUCKET(id) (((uint32_t)(id) * 3UL) & 0x0FUL)
+#define SLOT_JITTER_BITREV(b)  ((((b) & 0x01UL) << 3) | (((b) & 0x02UL) << 1) | (((b) & 0x04UL) >> 1) | (((b) & 0x08UL) >> 3))
+#define SLOT_JITTER_MILLIS(id) (SLOT_JITTER_BITREV(SLOT_JITTER_BUCKET(id)) * (uint32_t)SLOT_JITTER_STEP)
 
 /**
  * @brief Bit-packing macros for `RoutingMsg.depth`:
